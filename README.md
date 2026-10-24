@@ -13,8 +13,7 @@
 ├── style.css               # 首页样式（含 CSS 变量与夜间模式配色）
 ├── script.js               # 首页脚本（主题切换、导航高亮、视差、灯箱、实时时间）
 ├── pages/                  # 子页面
-│   ├── page01.html         # 笔记与资源导航
-│   ├── page02.html         # 技术资源导航
+│   ├── page01.html         # 智能导航看板（原 page02 已合并至此）
 │   ├── page03.html         # 常用网站快捷入口
 │   ├── page04.html         # 动态小球导航（共享 assets/css/style01.css + assets/js/script01.js）
 │   ├── page05.html         # 专业软件下载中心（数据驱动：9 分类 / 30 款软件）

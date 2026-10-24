@@ -36,8 +36,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // 初始化夜间模式切换
     initThemeToggle();
 
-    // 初始化微信灯箱
-    initWeixinLightbox();
+    // 初始化 QQ 群二维码灯箱
+    initQQLightbox();
+
+    // 页脚年份按当前时间自动更新
+    initCopyrightYear();
+
+    // 自定义光标
+    initCustomCursor();
 });
 
 // 夜间模式切换功能
@@ -294,11 +300,10 @@ function initParallax() {
     }), { passive: true });
 }
 
-// 微信图片灯箱
-function initWeixinLightbox() {
-    const lightbox = document.getElementById('weixinLightbox');
-    const btns = [document.getElementById('weixinBtn'), document.getElementById('weixinBtnMobile')];
-    const content = lightbox ? lightbox.querySelector('.lightbox-content') : null;
+// QQ 群二维码灯箱
+function initQQLightbox() {
+    const lightbox = document.getElementById('qqLightbox');
+    const btns = [document.getElementById('qqBtn'), document.getElementById('qqBtnMobile')];
 
     btns.forEach(btn => {
         if (btn) {
@@ -331,5 +336,78 @@ function initWeixinLightbox() {
     }
 }
 
+// 页脚年份：按当前时间自动更新，避免每年手改
+function initCopyrightYear() {
+    const el = document.getElementById('copyrightYear');
+    if (el) {
+        el.textContent = String(new Date().getFullYear());
+    }
+}
+
 // 控制台提示信息
 console.log('🚀 网站初始化完成！');
+// 自定义光标：圆环平滑跟随 + 中心点即时跟随，悬停可交互元素时圆环放大
+// 仅在支持精确指针（鼠标/触控笔）的设备启用；触摸设备与「减少动态效果」偏好下不启用
+function initCustomCursor() {
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!canHover || reduceMotion) return;
+
+    const dot = document.createElement('div');
+    dot.className = 'cursor-dot';
+    const ring = document.createElement('div');
+    ring.className = 'cursor-ring';
+    document.body.append(dot, ring);
+    // 只有脚本成功初始化后才隐藏系统光标，避免脚本出错时用户没有光标
+    document.body.classList.add('custom-cursor');
+
+    let targetX = window.innerWidth / 2;
+    let targetY = window.innerHeight / 2;
+    let ringX = targetX;
+    let ringY = targetY;
+    let visible = false;
+
+    const INTERACTIVE = 'a, button, input, textarea, select, label, [role="button"], .work-card, .tool-card, .card';
+
+    document.addEventListener('mousemove', (e) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        if (!visible) {
+            visible = true;
+            ringX = targetX;
+            ringY = targetY;
+            dot.style.opacity = '1';
+            ring.style.opacity = '1';
+        }
+    }, { passive: true });
+
+    document.addEventListener('mouseleave', () => {
+        visible = false;
+        dot.style.opacity = '0';
+        ring.style.opacity = '0';
+    });
+
+    document.addEventListener('mouseover', (e) => {
+        if (e.target instanceof Element && e.target.closest(INTERACTIVE)) {
+            document.body.classList.add('cursor-hover');
+        }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+        if (e.target instanceof Element && e.target.closest(INTERACTIVE)) {
+            document.body.classList.remove('cursor-hover');
+        }
+    });
+
+    document.addEventListener('mousedown', () => document.body.classList.add('cursor-down'), { passive: true });
+    document.addEventListener('mouseup', () => document.body.classList.remove('cursor-down'), { passive: true });
+
+    // 圆环用缓动跟随，中心点即时跟随，形成层次感
+    (function render() {
+        dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0) translate(-50%, -50%)`;
+        ringX += (targetX - ringX) * 0.18;
+        ringY += (targetY - ringY) * 0.18;
+        ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+        requestAnimationFrame(render);
+    })();
+}

@@ -127,12 +127,12 @@ test('page04 必须提供返回首页的入口', () => {
   );
 });
 
-test('首页微信二维码图片必须声明固有尺寸以避免加载抖动', () => {
+test('首页 QQ 群二维码图片必须声明固有尺寸以避免加载抖动', () => {
   const html = read('index.html');
-  const img = html.match(/<img\b[^>]*weixin\.png[^>]*>/);
-  assert.ok(img, 'index.html 未找到微信二维码图片');
-  assert.match(img[0], /\bwidth="\d+"/, '微信二维码图片缺少 width 属性');
-  assert.match(img[0], /\bheight="\d+"/, '微信二维码图片缺少 height 属性');
+  const img = html.match(/<img\b[^>]*qq\.jpg[^>]*>/);
+  assert.ok(img, 'index.html 未找到 QQ 群二维码图片');
+  assert.match(img[0], /\bwidth="\d+"/, '二维码图片缺少 width 属性');
+  assert.match(img[0], /\bheight="\d+"/, '二维码图片缺少 height 属性');
 });
 
 test('page04 脚本动态生成的 _blank 链接必须带 rel 防护', () => {
@@ -239,7 +239,7 @@ test('首页作品卡片必须是可抓取的语义化链接', () => {
   assert.ok(grid, 'index.html 未找到 works-grid 容器');
 
   const cards = [...grid[1].matchAll(/<a\b[^>]*class="work-card"[^>]*>/g)];
-  assert.equal(cards.length, 15, `作品卡片应为 15 个语义化 <a>，实际 ${cards.length} 个`);
+  assert.equal(cards.length, 12, `作品卡片应为 12 个语义化 <a>，实际 ${cards.length} 个`);
 
   const bad = cards.filter((m) => !/href="https?:\/\//.test(m[0]));
   assert.deepEqual(bad.map((m) => m[0]), [], '存在没有合法 http(s) href 的作品卡片');
@@ -259,4 +259,59 @@ test('滚动监听必须经过 rAF 节流', () => {
     .map((m) => m[1].trim())
     .filter((handler) => !/rafThrottle\(/.test(handler));
   assert.deepEqual(unthrottled, [], `以下 scroll 监听未节流: ${unthrottled.join(', ')}`);
+});
+
+test('导航栏社交链接指向正确的账号地址', () => {
+  const html = read('index.html');
+  // GitHub 用户名实测：github.com/xyos2 为 404，正确账号是 Rime2027
+  assert.match(html, /https:\/\/github\.com\/Rime2027/, 'GitHub 链接不是 Rime2027');
+  assert.doesNotMatch(html, /https:\/\/github\.com\/xyos2(?!"|\/)/, 'GitHub 链接仍指向已失效的 xyos2');
+  assert.match(
+    html,
+    /https:\/\/my\.feishu\.cn\/wiki\/space\/7695374812016806852/,
+    '教程文档链接未指向飞书知识库',
+  );
+  assert.match(html, /掘金社区/, '导航栏缺少「掘金社区」文案');
+});
+
+test('QQ 群二维码灯箱结构完整', () => {
+  const html = read('index.html');
+  assert.match(html, /id="qqLightbox"/, '缺少 QQ 灯箱容器');
+  assert.match(html, /id="qqBtn"/, '缺少桌面端 QQ 触发按钮');
+  assert.match(html, /id="qqBtnMobile"/, '缺少移动端 QQ 触发按钮');
+  assert.match(html, /扫描二维码加入qq群/, '灯箱下方缺少「扫描二维码加入qq群」文案');
+  assert.match(html, /fa-qq/, 'QQ 图标未使用 fa-qq');
+  assert.doesNotMatch(html, /fa-weixin|weixin\.png/, '仍残留微信相关资源');
+});
+
+test('页脚年份由脚本接管而非写死', () => {
+  const html = read('index.html');
+  const footer = html.match(/©\s*<span id="copyrightYear">[^<]*<\/span>/);
+  assert.ok(footer, '页脚年份未使用 copyrightYear 占位元素');
+  const js = read('script.js');
+  assert.match(js, /getFullYear\(\)/, 'script.js 未用 getFullYear 计算年份');
+  assert.match(js, /copyrightYear/, 'script.js 未更新 copyrightYear 元素');
+});
+
+test('首页工具卡片全部在新窗口打开，且不再指向已删除页面', () => {
+  const html = read('index.html');
+  const cards = [...html.matchAll(/<a\b[^>]*class="tool-card"[^>]*>/g)].map((m) => m[0]);
+  assert.ok(cards.length > 0, '未找到工具卡片');
+
+  const noBlank = cards.filter((t) => !/target="_blank"/.test(t));
+  assert.deepEqual(noBlank, [], '存在未在新窗口打开的工具卡片');
+
+  const dangling = cards.filter((t) => /page02\.html|cli\.im/.test(t));
+  assert.deepEqual(dangling, [], '工具卡片仍指向已合并/已删除的页面');
+});
+
+test('自定义光标在触屏与减少动效偏好下应降级', () => {
+  const js = read('script.js');
+  assert.match(js, /initCustomCursor/, 'script.js 缺少自定义光标初始化');
+  assert.match(js, /\(hover: hover\) and \(pointer: fine\)/, '光标未做指针能力检测');
+  assert.match(js, /prefers-reduced-motion/, '光标未尊重「减少动态效果」偏好');
+  const css = read('style.css');
+  assert.match(css, /\.cursor-dot/, '缺少光标中心点样式');
+  assert.match(css, /\.cursor-ring/, '缺少光标圆环样式');
+  assert.match(css, /body\.custom-cursor/, '缺少隐藏系统光标的样式');
 });

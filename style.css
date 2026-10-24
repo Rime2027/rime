@@ -759,7 +759,7 @@ body.dark .theme-toggle i {
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
     text-align: center;
-    max-width: 360px;
+    max-width: 420px;
     width: 90%;
     box-shadow: var(--shadow-lg);
     cursor: default;
@@ -772,13 +772,93 @@ body.dark .theme-toggle i {
 }
 
 .lightbox-img {
+    display: block;
+    width: 100%;
     max-width: 100%;
-    max-height: 300px;
+    max-height: min(56vh, 520px);
+    object-fit: contain;
     border-radius: var(--radius-sm);
-    margin-bottom: var(--space-sm);
+    margin: 0 auto var(--space-sm);
 }
 
 .lightbox-hint {
     color: var(--color-text-light);
     font-size: 0.9rem;
+}
+/* ===== 自定义光标（圆环 + 中心点） ===== */
+/* 仅在有精确指针的设备上启用；触摸设备保持系统默认行为 */
+@media (hover: hover) and (pointer: fine) {
+    body.custom-cursor,
+    body.custom-cursor * {
+        cursor: none !important;
+    }
+}
+
+.cursor-dot,
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    will-change: transform;
+}
+
+.cursor-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-primary);
+}
+
+.cursor-ring {
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid var(--color-primary);
+    transition: width 0.22s ease, height 0.22s ease, border-radius 0.22s ease,
+        background-color 0.22s ease, border-color 0.22s ease, opacity 0.25s ease;
+}
+
+/* 悬停在可交互元素上：圆环放大并填充 */
+body.cursor-hover .cursor-ring {
+    width: 58px;
+    height: 58px;
+    background-color: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.55);
+}
+
+/* 按下时收缩 */
+body.cursor-down .cursor-ring {
+    width: 24px;
+    height: 24px;
+    background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* 夜间模式下跟随主色 */
+body.dark .cursor-dot {
+    background-color: var(--color-secondary);
+}
+
+body.dark .cursor-ring {
+    border-color: var(--color-secondary);
+}
+
+body.dark.cursor-hover .cursor-ring {
+    background-color: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.6);
+}
+
+/* 尊重「减少动态效果」偏好：不启用自定义光标 */
+@media (prefers-reduced-motion: reduce) {
+    body.custom-cursor,
+    body.custom-cursor * {
+        cursor: auto !important;
+    }
+
+    .cursor-dot,
+    .cursor-ring {
+        display: none;
+    }
 }

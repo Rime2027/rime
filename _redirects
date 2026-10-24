@@ -1,5 +1,9 @@
 # Netlify 重定向规则
-# 三份重复页面已删除，旧链接 301 到正本，避免外部已分享的地址 404
+# 已删除/合并的页面，旧链接 301 到正本，避免外部已分享的地址 404
+
+# page02 已并入 page01（合并后采用 page02 的样式，内容取并集）
+/pages/page02        /pages/page01        301
+/pages/page02.html   /pages/page01.html   301
 
 /pages/page07        /pages/page01        301
 /pages/page07.html   /pages/page01.html   301
