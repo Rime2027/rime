@@ -365,3 +365,87 @@ test('常用链接页在首页与 sitemap 中可达，且复用同一套令牌',
   assert.match(page, /assets\/css\/tokens\.css/, 'page07 未复用 tokens.css，主题自定义不会生效');
   assert.match(page, /localStorage\.getItem\('theme-mode'\)/, 'page07 未继承首页的主题偏好');
 });
+
+// ---- 色彩对比度（WCAG AA）机械校验：改色后仍保证文字可读 ----
+function parseTokenBlock(css, selector) {
+  const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = css.match(new RegExp(esc + '\\s*\\{([^}]*)\\}'));
+  if (!m) return {};
+  const vars = {};
+  for (const part of m[1].split(';')) {
+    const mm = part.match(/(--[\w-]+)\s*:\s*(.+)/);
+    if (mm) vars[mm[1].trim()] = mm[2].trim();
+  }
+  return vars;
+}
+
+function resolveToken(vars, value, depth = 0) {
+  if (depth > 8) return null;
+  const m = String(value || '').match(/^var\((--[\w-]+)\)$/);
+  if (!m) return String(value || '');
+  return resolveToken(vars, vars[m[1]], depth + 1);
+}
+
+function hexToRgb(color) {
+  const hex = String(color).replace('#', '').trim();
+  if (/^[0-9a-f]{6}$/i.test(hex)) return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  if (/^[0-9a-f]{3}$/i.test(hex)) return [0, 1, 2].map((i) => parseInt(hex[i] + hex[i], 16));
+  return null;
+}
+
+function relativeLuminance([r, g, b]) {
+  const f = (v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+}
+
+function contrastRatio(a, b) {
+  const la = relativeLuminance(a);
+  const lb = relativeLuminance(b);
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+test('所有主题组合下关键文字对比度满足 WCAG AA', () => {
+  const tokens = read('assets/css/tokens.css');
+  const accents = [...tokens.matchAll(/body\[data-accent="(\w+)"\]/g)].map((m) => m[1]);
+
+  const pairs = [
+    ['正文', '--color-text', '--color-bg', 4.5],
+    ['标题', '--color-text-dark', '--color-bg', 4.5],
+    ['次要', '--color-text-light', '--color-card', 4.5],
+    ['主色', '--color-primary', '--color-card', 4.5],
+    ['辅助', '--color-text-muted', '--color-bg', 3.0],
+  ];
+
+  const failures = [];
+
+  for (const dark of [false, true]) {
+    for (const accent of accents) {
+      const vars = { ...parseTokenBlock(tokens, ':root') };
+      Object.assign(vars, parseTokenBlock(tokens, `body[data-accent="${accent}"]`));
+      if (dark) {
+        Object.assign(vars, parseTokenBlock(tokens, 'body.dark'));
+        Object.assign(vars, parseTokenBlock(tokens, `body.dark[data-accent="${accent}"]`));
+      }
+
+      for (const [name, fgVar, bgVar, min] of pairs) {
+        const fg = hexToRgb(resolveToken(vars, vars[fgVar]));
+        const bg = hexToRgb(resolveToken(vars, vars[bgVar]));
+        if (!fg || !bg) {
+          failures.push(`${dark ? '深色' : '浅色'}/${accent} ${name}: 无法解析颜色`);
+          continue;
+        }
+        const ratio = contrastRatio(fg, bg);
+        if (ratio < min) {
+          failures.push(
+            `${dark ? '深色' : '浅色'}/${accent} ${name}: ${ratio.toFixed(2)} < ${min}`,
+          );
+        }
+      }
+    }
+  }
+
+  assert.deepEqual(failures, [], `以下配色对比度不足:\n${failures.join('\n')}`);
+});
