@@ -402,11 +402,31 @@ function initCustomCursor() {
     document.addEventListener('mousedown', () => document.body.classList.add('cursor-down'), { passive: true });
     document.addEventListener('mouseup', () => document.body.classList.remove('cursor-down'), { passive: true });
 
-    // 圆环用缓动跟随，中心点即时跟随，形成层次感
+    // 圆环缓动跟随、中心点即时跟随。
+    // 两个约束保证快速甩动时中心点不会脱出圆环：
+    //   1) 缓动系数随距离增大而趋近 1，甩得越快跟得越紧；
+    //   2) 硬钳制：插值后若偏移仍超过圆环内缘，直接把圆环拉到边界上。
     (function render() {
         dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0) translate(-50%, -50%)`;
-        ringX += (targetX - ringX) * 0.18;
-        ringY += (targetY - ringY) * 0.18;
+
+        const dx = targetX - ringX;
+        const dy = targetY - ringY;
+        const dist = Math.hypot(dx, dy);
+
+        const ease = Math.min(0.92, 0.18 + dist / 90);
+        ringX += dx * ease;
+        ringY += dy * ease;
+
+        // 圆环半径 17px（常态）／29px（悬停放大），减去中心点半径与 2px 内边距
+        const maxOffset = document.body.classList.contains('cursor-hover') ? 22 : 13;
+        const ox = targetX - ringX;
+        const oy = targetY - ringY;
+        const od = Math.hypot(ox, oy);
+        if (od > maxOffset) {
+            ringX = targetX - (ox / od) * maxOffset;
+            ringY = targetY - (oy / od) * maxOffset;
+        }
+
         ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
         requestAnimationFrame(render);
     })();
