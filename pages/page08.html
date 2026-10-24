@@ -90,14 +90,23 @@
         .topbar__nav {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.95rem;
+            gap: 0.35rem;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
-        .topbar__nav a {
-            padding: 0.6rem 0.55rem;
+        .topbar__nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .topbar__nav a,
+        .topbar__nav span {
+            padding: 0.55rem 0.5rem;
             border-radius: var(--radius-sm);
             color: var(--color-text-light);
+            white-space: nowrap;
             transition: color 0.15s ease, background-color 0.15s ease;
         }
 
@@ -106,9 +115,12 @@
             background-color: var(--color-primary-soft);
         }
 
-        .topbar__nav a.is-current {
+        /* 当前页不可点击：用 span，避免自我跳转 */
+        .topbar__nav .is-current {
             color: var(--color-primary);
             font-weight: 600;
+            background-color: var(--color-primary-soft);
+            cursor: default;
         }
 
         /* ---- 页头 ---- */
@@ -274,9 +286,18 @@
             color: var(--color-primary);
         }
 
-        @media (max-width: 560px) {
+        @media (max-width: 720px) {
+            .topbar__inner {
+                height: auto;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 10px var(--space-md);
+            }
+
+            /* 移动端不再隐藏导航，改为整行横向滚动，保证始终可达 */
             .topbar__nav {
-                display: none;
+                width: 100%;
+                padding-bottom: 2px;
             }
 
             .page-head h1 {
@@ -299,11 +320,10 @@
             </a>
             <nav class="topbar__nav" aria-label="页面导航">
                 <a href="../index.html">首页</a>
-                <a href="page01.html">导航看板</a>
-                <a href="page03.html">网站入口</a>
-                <a href="page05.html">软件下载</a>
                 <a href="page07.html">常用链接</a>
-                <a class="is-current" href="page08.html">开发工具箱</a>
+                <span class="is-current" aria-current="page">开发工具箱</span>
+                <a href="page09.html">浏览器信息</a>
+                <a href="page10.html">大小写转换</a>
             </nav>
         </div>
     </header>

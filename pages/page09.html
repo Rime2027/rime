@@ -90,14 +90,23 @@
         .topbar__nav {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.95rem;
+            gap: 0.35rem;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
-        .topbar__nav a {
-            padding: 0.6rem 0.55rem;
+        .topbar__nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .topbar__nav a,
+        .topbar__nav span {
+            padding: 0.55rem 0.5rem;
             border-radius: var(--radius-sm);
             color: var(--color-text-light);
+            white-space: nowrap;
             transition: color 0.15s ease, background-color 0.15s ease;
         }
 
@@ -106,9 +115,12 @@
             background-color: var(--color-primary-soft);
         }
 
-        .topbar__nav a.is-current {
+        /* 当前页不可点击：用 span，避免自我跳转 */
+        .topbar__nav .is-current {
             color: var(--color-primary);
             font-weight: 600;
+            background-color: var(--color-primary-soft);
+            cursor: default;
         }
 
         .page-head {
@@ -274,9 +286,18 @@
             color: var(--color-primary);
         }
 
-        @media (max-width: 560px) {
+        @media (max-width: 720px) {
+            .topbar__inner {
+                height: auto;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 10px var(--space-md);
+            }
+
+            /* 移动端不再隐藏导航，改为整行横向滚动，保证始终可达 */
             .topbar__nav {
-                display: none;
+                width: 100%;
+                padding-bottom: 2px;
             }
 
             .page-head h1 {
@@ -305,7 +326,8 @@
                 <a href="../index.html">首页</a>
                 <a href="page07.html">常用链接</a>
                 <a href="page08.html">开发工具箱</a>
-                <a class="is-current" href="page09.html">浏览器信息</a>
+                <span class="is-current" aria-current="page">浏览器信息</span>
+                <a href="page10.html">大小写转换</a>
             </nav>
         </div>
     </header>
@@ -342,12 +364,11 @@
             </section>
 
             <section class="panel">
-                <h2><i class="fas fa-expand"></i> 屏幕与视口</h2>
+                <h2><i class="fas fa-microchip"></i> 图形与性能</h2>
                 <dl>
-                    <div class="row"><dt>屏幕分辨率</dt><dd id="screenSize">—</dd></div>
-                    <div class="row"><dt>视口尺寸</dt><dd id="viewport">—</dd></div>
-                    <div class="row"><dt>像素比</dt><dd id="dpr">—</dd></div>
-                    <div class="row"><dt>色彩深度</dt><dd id="colorDepth">—</dd></div>
+                    <div class="row"><dt>GPU 渲染器</dt><dd id="gpu" class="is-mono">—</dd></div>
+                    <div class="row"><dt>页面加载</dt><dd id="timing">—</dd></div>
+                    <div class="row"><dt>存储配额</dt><dd id="storage">—</dd></div>
                 </dl>
             </section>
 
@@ -389,6 +410,7 @@
                     <div class="row"><dt>触摸支持</dt><dd id="touch">—</dd></div>
                     <div class="row"><dt>指针精度</dt><dd id="pointer">—</dd></div>
                     <div class="row"><dt>减少动效</dt><dd id="reduceMotion">—</dd></div>
+                    <div class="row"><dt>系统主题</dt><dd id="colorScheme">—</dd></div>
                 </dl>
             </section>
         </div>
@@ -463,8 +485,41 @@
                 return '桌面';
             }
 
-            function formatOffset(minutes) {
-                var sign = minutes <= 0 ? '+' : '-';
+            // GPU 通过 WebGL 暴露；Safari / Firefox 出于隐私可能只给通用值
+            function getGPU() {
+                try {
+                    var canvas = document.createElement('canvas');
+                    var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                    if (!gl) return '不支持 WebGL';
+                    var ext = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (ext) {
+                        var r = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+                        if (r) return r;
+                    }
+                    return gl.getParameter(gl.RENDERER) || '未提供';
+                } catch (e) {
+                    return '不可用';
+                }
+            }
+
+            // 本次页面加载耗时（Navigation Timing）
+            function getTiming() {
+                try {
+                    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+                    if (nav) {
+                        return 'DOM 就绪 ' + Math.round(nav.domContentLoadedEventEnd) +
+                            'ms · 完全加载 ' + Math.round(nav.loadEventEnd) + 'ms';
+                    }
+                    var t = performance.timing;
+                    if (t && t.navigationStart) {
+                        return 'DOM 就绪 ' + (t.domContentLoadedEventEnd - t.navigationStart) +
+                            'ms · 完全加载 ' + (t.loadEventEnd - t.navigationStart) + 'ms';
+                    }
+                } catch (e) { /* 忽略，走默认值 */ }
+                return '不可用';
+            }
+
+            function formatOffset(minutes) {                var sign = minutes <= 0 ? '+' : '-';
                 var abs = Math.abs(minutes);
                 var h = String(Math.floor(abs / 60)).padStart(2, '0');
                 var m = String(abs % 60).padStart(2, '0');
@@ -483,10 +538,20 @@
                 set('deviceType', detectDevice(UA));
                 set('platform', navigator.platform || '未提供');
 
-                set('screenSize', screen.width + ' × ' + screen.height);
-                set('viewport', window.innerWidth + ' × ' + window.innerHeight);
-                set('dpr', window.devicePixelRatio ? window.devicePixelRatio + 'x' : '—');
-                set('colorDepth', screen.colorDepth ? screen.colorDepth + ' 位' : '—');
+                set('gpu', getGPU());
+                set('timing', getTiming());
+
+                if (navigator.storage && navigator.storage.estimate) {
+                    navigator.storage.estimate().then(function (est) {
+                        var used = (est.usage / 1048576).toFixed(1);
+                        var quota = (est.quota / 1073741824).toFixed(1);
+                        set('storage', used + ' MB 已用 / ' + quota + ' GB 配额');
+                    }).catch(function () {
+                        set('storage', '不可用');
+                    });
+                } else {
+                    set('storage', '未提供');
+                }
 
                 set('language', navigator.language);
                 set('languages', (navigator.languages || []).join(', '));
@@ -509,6 +574,7 @@
                 set('touch', ('ontouchstart' in window) || navigator.maxTouchPoints > 0 ? '支持' : '不支持');
                 set('pointer', window.matchMedia('(pointer: fine)').matches ? '精确（鼠标/触控笔）' : '粗略（触摸）');
                 set('reduceMotion', window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '已开启' : '未开启');
+                set('colorScheme', window.matchMedia('(prefers-color-scheme: dark)').matches ? '深色' : '浅色');
             }
 
             // ---- 时间：每秒刷新 ----
@@ -539,9 +605,6 @@
             setInterval(tickTime, 1000);
             window.addEventListener('online', updateOnline);
             window.addEventListener('offline', updateOnline);
-            window.addEventListener('resize', function () {
-                set('viewport', window.innerWidth + ' × ' + window.innerHeight);
-            });
 
             // ---- 复制 ----
             document.getElementById('copyAll').addEventListener('click', function () {

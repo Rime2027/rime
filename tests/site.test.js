@@ -680,3 +680,111 @@ test('Hero 标题渐变在浅色与深色下都有足够色差', () => {
   assert.ok(darkStops.length >= 2, '深色渐变应至少有两个色标');
   assert.notEqual(darkStops[0], darkStops[darkStops.length - 1], '深色渐变首尾不能是同一个色阶变量');
 });
+
+// ---- 英文字符串大小写转换 ----
+async function loadTextCase() {
+  const vm = (await import('node:vm')).default;
+  const ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext(read('assets/js/text-case.js'), ctx);
+  return ctx.TextCase;
+}
+
+test('大小写转换：各模式的输出符合预期', async () => {
+  const T = await loadTextCase();
+
+  const cases = [
+    ['upper', 'Hello World', 'HELLO WORLD'],
+    ['lower', 'Hello World', 'hello world'],
+    ['capitalize', 'hello WORLD', 'Hello World'],
+    ['capitalize', 'hello_world', 'Hello World'],
+    ['sentence', 'hello. world! ok?', 'Hello. World! Ok?'],
+    ['toggle', 'Hello World', 'hELLO wORLD'],
+    ['camel', 'hello world', 'helloWorld'],
+    ['camel', 'hello_world', 'helloWorld'],
+    ['camel', 'Hello World', 'helloWorld'],
+    ['pascal', 'hello world', 'HelloWorld'],
+    ['pascal', 'hello-world', 'HelloWorld'],
+    ['snake', 'helloWorld', 'hello_world'],
+    ['snake', 'Hello World', 'hello_world'],
+    ['kebab', 'helloWorld', 'hello-world'],
+    ['constant', 'hello world', 'HELLO_WORLD'],
+    ['constant', 'helloWorld', 'HELLO_WORLD'],
+  ];
+
+  const failures = [];
+  for (const [mode, input, expected] of cases) {
+    const actual = T[mode](input);
+    if (actual !== expected) {
+      failures.push(`${mode}("${input}") = "${actual}"，期望 "${expected}"`);
+    }
+  }
+  assert.deepEqual(failures, [], `转换结果不符合预期:\n${failures.join('\n')}`);
+});
+
+test('大小写转换：空输入与非字母字符不应抛错', async () => {
+  const T = await loadTextCase();
+  for (const mode of ['upper', 'lower', 'capitalize', 'sentence', 'toggle', 'camel', 'pascal', 'snake', 'kebab', 'constant']) {
+    assert.doesNotThrow(() => T[mode](''), `${mode} 处理空字符串时抛错`);
+    assert.doesNotThrow(() => T[mode]('123 !@# 你好'), `${mode} 处理非字母内容时抛错`);
+  }
+  assert.equal(T.camel(''), '', 'camel 空输入应返回空串');
+  assert.equal(T.constant('123'), '123', 'constant 对纯数字应原样返回');
+});
+
+test('page10 页面存在且接入转换模块', () => {
+  const html = read('pages/page10.html');
+  assert.match(html, /assets\/js\/text-case\.js/, 'page10 未引入 text-case.js');
+  assert.match(html, /id="input"/, 'page10 缺少输入框');
+  assert.match(html, /id="output"/, 'page10 缺少输出框');
+  for (const mode of ['upper', 'lower', 'capitalize', 'sentence', 'toggle', 'camel', 'pascal', 'snake', 'kebab', 'constant']) {
+    assert.match(html, new RegExp(`data-mode="${mode}"`), `page10 缺少转换模式按钮: ${mode}`);
+  }
+});
+
+test('浏览器信息页：移除屏幕视口，改为图形与性能等自动可获取项', () => {
+  const html = read('pages/page09.html');
+
+  for (const removed of ['screenSize', 'viewport', 'dpr', 'colorDepth']) {
+    assert.doesNotMatch(html, new RegExp(`id="${removed}"`), `page09 不应再显示 ${removed}`);
+  }
+
+  for (const added of ['gpu', 'timing', 'storage', 'colorScheme']) {
+    assert.match(html, new RegExp(`id="${added}"`), `page09 缺少新增字段 ${added}`);
+  }
+
+  assert.match(html, /WEBGL_debug_renderer_info/, 'GPU 应通过 WebGL 调试扩展获取');
+  assert.match(html, /performance\.getEntriesByType|performance\.timing/, '页面加载耗时应取自 Performance API');
+  assert.match(html, /navigator\.storage\.estimate/, '存储配额应使用 navigator.storage.estimate');
+});
+
+test('page07/08/09/10 导航一致，且当前页不可点击', () => {
+  const pages = ['pages/page07.html', 'pages/page08.html', 'pages/page09.html', 'pages/page10.html'];
+  const expected = ['page07.html', 'page08.html', 'page09.html', 'page10.html'];
+
+  for (const file of pages) {
+    const html = read(file);
+    const nav = html.match(/<nav class="topbar__nav"[\s\S]*?<\/nav>/);
+    assert.ok(nav, `${file} 缺少导航`);
+
+    // 当前页用 span 而非 a，且带 aria-current
+    assert.match(nav[0], /<span class="is-current" aria-current="page">/, `${file} 当前页应使用不可点击的 span`);
+    assert.doesNotMatch(nav[0], /class="is-current"[^>]*href=/, `${file} 当前页仍带有链接`);
+
+    // 除自身外，其余三个工具页都应可达
+    for (const target of expected) {
+      const self = file.endsWith(target.replace('page', 'page'));
+      if (self) {
+        assert.doesNotMatch(nav[0], new RegExp(`href="${target}"`), `${file} 不应链接到自身`);
+      } else {
+        assert.match(nav[0], new RegExp(`href="${target}"`), `${file} 缺少到 ${target} 的链接`);
+      }
+    }
+
+    // 移动端不得再用 display:none 隐藏整个导航
+    const mediaBlock = html.match(/@media \(max-width: \d+px\)[\s\S]*?\n        \}/);
+    if (mediaBlock && /\.topbar__nav\s*\{[^}]*display:\s*none/.test(mediaBlock[0])) {
+      assert.fail(`${file} 移动端隐藏了导航，用户将无法跳转`);
+    }
+  }
+});

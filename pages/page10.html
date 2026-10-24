@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英文大小写转换 | 星宇·航图</title>
+    <meta name="description" content="英文字符串大小写转换：全大写、全小写、首字母大写、句首大写、大小写反转、驼峰、帕斯卡、下划线、连字符、常量命名。">
+    <link rel="canonical" href="https://xyos2.xyz/pages/page10.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="星宇·航图 | XY's Blog">
+    <meta property="og:title" content="英文大小写转换 | 星宇·航图">
+    <meta property="og:description" content="英文字符串大小写转换，支持 10 种命名格式，实时预览。">
+    <meta property="og:url" content="https://xyos2.xyz/pages/page10.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="robots" content="noindex, follow">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%90%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../assets/css/tokens.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .wrap {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: linear-gradient(180deg,
+                color-mix(in srgb, var(--color-card) 94%, transparent) 0%,
+                color-mix(in srgb, var(--color-card) 72%, transparent) 100%);
+            backdrop-filter: blur(14px) saturate(1.5);
+            -webkit-backdrop-filter: blur(14px) saturate(1.5);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .topbar__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-md);
+            height: 64px;
+            padding: 0 var(--space-md);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 650;
+            color: var(--color-text-dark);
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        .brand__dot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-primary);
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .topbar__nav {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .topbar__nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .topbar__nav a,
+        .topbar__nav span {
+            padding: 0.55rem 0.5rem;
+            border-radius: var(--radius-sm);
+            color: var(--color-text-light);
+            white-space: nowrap;
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .topbar__nav a:hover {
+            color: var(--color-primary);
+            background-color: var(--color-primary-soft);
+        }
+
+        /* 当前页不可点击：用 span 而非 a，避免无意义的自我跳转 */
+        .topbar__nav .is-current {
+            color: var(--color-primary);
+            font-weight: 600;
+            background-color: var(--color-primary-soft);
+            cursor: default;
+        }
+
+        .page-head {
+            padding: var(--space-xl) 0 var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .page-head h1 {
+            font-size: 2.2rem;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            color: var(--color-text-dark);
+            margin-bottom: 10px;
+        }
+
+        .page-head p {
+            color: var(--color-text-light);
+            font-size: 1.05rem;
+            max-width: 680px;
+        }
+
+        .workspace {
+            padding: var(--space-lg) 0 var(--space-xl);
+            display: grid;
+            gap: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field__head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .field label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--color-text-dark);
+        }
+
+        .field__meta {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background-color: var(--color-card);
+            color: var(--color-text);
+            font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            resize: vertical;
+            transition: border-color 0.15s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        #input {
+            min-height: 150px;
+        }
+
+        #output {
+            min-height: 150px;
+            background-color: var(--color-bg-subtle);
+        }
+
+        .modes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 8px;
+        }
+
+        .mode {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            padding: 10px 14px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background-color: var(--color-card);
+            color: var(--color-text);
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .mode:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .mode[aria-pressed="true"] {
+            border-color: var(--color-primary);
+            background-color: var(--color-primary-soft);
+            color: var(--color-primary);
+        }
+
+        .mode__name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .mode__sample {
+            font-size: 0.74rem;
+            color: var(--color-text-muted);
+            font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+        }
+
+        .mode[aria-pressed="true"] .mode__sample {
+            color: var(--color-primary);
+            opacity: 0.75;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: 1px solid var(--color-border-strong);
+            border-radius: var(--radius-sm);
+            background-color: transparent;
+            color: var(--color-text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .btn--primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #FFFFFF;
+        }
+
+        .btn--primary:hover {
+            background-color: var(--color-primary-hover);
+            border-color: var(--color-primary-hover);
+            color: #FFFFFF;
+        }
+
+        .foot {
+            border-top: 1px solid var(--color-border);
+            padding: var(--space-lg) 0;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        .foot__inner {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .foot a {
+            color: var(--color-text-light);
+        }
+
+        .foot a:hover {
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 720px) {
+            .topbar__inner {
+                height: auto;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 10px var(--space-md);
+            }
+
+            .topbar__nav {
+                width: 100%;
+                padding-bottom: 2px;
+            }
+
+            .page-head h1 {
+                font-size: 1.7rem;
+            }
+
+            .modes {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="wrap topbar__inner">
+            <a class="brand" href="../index.html">
+                <span class="brand__dot"><i class="fas fa-compass"></i></span>
+                星宇·航图
+            </a>
+            <nav class="topbar__nav" aria-label="页面导航">
+                <a href="../index.html">首页</a>
+                <a href="page07.html">常用链接</a>
+                <a href="page08.html">开发工具箱</a>
+                <a href="page09.html">浏览器信息</a>
+                <span class="is-current" aria-current="page">大小写转换</span>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="page-head">
+            <h1>英文大小写转换</h1>
+            <p>输入文本后选择一种格式，结果实时更新。支持全大写、全小写、首字母大写、句首大写、大小写反转，以及驼峰、帕斯卡、下划线、连字符、常量五种命名风格。</p>
+        </div>
+
+        <div class="workspace">
+            <div class="field">
+                <div class="field__head">
+                    <label for="input">原文</label>
+                    <span class="field__meta" id="inputStat">0 字符 · 0 词 · 0 行</span>
+                </div>
+                <textarea id="input" placeholder="在这里输入或粘贴英文文本，例如：hello world" spellcheck="false"></textarea>
+            </div>
+
+            <div class="modes" role="group" aria-label="转换格式">
+                <button type="button" class="mode" data-mode="upper" aria-pressed="false">
+                    <span class="mode__name">全部大写</span>
+                    <span class="mode__sample">HELLO WORLD</span>
+                </button>
+                <button type="button" class="mode" data-mode="lower" aria-pressed="false">
+                    <span class="mode__name">全部小写</span>
+                    <span class="mode__sample">hello world</span>
+                </button>
+                <button type="button" class="mode" data-mode="capitalize" aria-pressed="true">
+                    <span class="mode__name">首字母大写</span>
+                    <span class="mode__sample">Hello World</span>
+                </button>
+                <button type="button" class="mode" data-mode="sentence" aria-pressed="false">
+                    <span class="mode__name">句首大写</span>
+                    <span class="mode__sample">Hello. World.</span>
+                </button>
+                <button type="button" class="mode" data-mode="toggle" aria-pressed="false">
+                    <span class="mode__name">大小写反转</span>
+                    <span class="mode__sample">hELLO wORLD</span>
+                </button>
+                <button type="button" class="mode" data-mode="camel" aria-pressed="false">
+                    <span class="mode__name">驼峰</span>
+                    <span class="mode__sample">helloWorld</span>
+                </button>
+                <button type="button" class="mode" data-mode="pascal" aria-pressed="false">
+                    <span class="mode__name">帕斯卡</span>
+                    <span class="mode__sample">HelloWorld</span>
+                </button>
+                <button type="button" class="mode" data-mode="snake" aria-pressed="false">
+                    <span class="mode__name">下划线</span>
+                    <span class="mode__sample">hello_world</span>
+                </button>
+                <button type="button" class="mode" data-mode="kebab" aria-pressed="false">
+                    <span class="mode__name">连字符</span>
+                    <span class="mode__sample">hello-world</span>
+                </button>
+                <button type="button" class="mode" data-mode="constant" aria-pressed="false">
+                    <span class="mode__name">常量</span>
+                    <span class="mode__sample">HELLO_WORLD</span>
+                </button>
+            </div>
+
+            <div class="field">
+                <div class="field__head">
+                    <label for="output">转换结果</label>
+                    <span class="field__meta" id="outputStat">0 字符</span>
+                </div>
+                <textarea id="output" readonly placeholder="转换结果会显示在这里"></textarea>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn--primary" id="copy">复制结果</button>
+                <button type="button" class="btn" id="applyToInput">结果替换原文</button>
+                <button type="button" class="btn" id="clear">清空</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="foot">
+        <div class="wrap foot__inner">
+            <span>© <span id="footYear">2026</span> 星宇·航图 | XY's Blog</span>
+            <span><a href="../index.html">返回首页</a></span>
+        </div>
+    </footer>
+
+    <script src="../assets/js/text-case.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            var yearEl = document.getElementById('footYear');
+            if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+            var input = document.getElementById('input');
+            var output = document.getElementById('output');
+            var inputStat = document.getElementById('inputStat');
+            var outputStat = document.getElementById('outputStat');
+            var modeBtns = Array.from(document.querySelectorAll('.mode'));
+
+            var currentMode = 'capitalize';
+
+            function stats(text) {
+                var chars = text.length;
+                var lines = text ? text.split('\n').length : 0;
+                var words = text.trim() ? text.trim().split(/\s+/).length : 0;
+                return chars + ' 字符 · ' + words + ' 词 · ' + lines + ' 行';
+            }
+
+            function render() {
+                var text = input.value;
+                inputStat.textContent = stats(text);
+                if (!text) {
+                    output.value = '';
+                    outputStat.textContent = '0 字符';
+                    return;
+                }
+                var result = '';
+                try {
+                    result = window.TextCase[currentMode](text);
+                } catch (e) {
+                    result = '';
+                }
+                output.value = result;
+                outputStat.textContent = result.length + ' 字符';
+            }
+
+            modeBtns.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    currentMode = btn.dataset.mode;
+                    modeBtns.forEach(function (b) {
+                        b.setAttribute('aria-pressed', String(b === btn));
+                    });
+                    render();
+                });
+            });
+
+            input.addEventListener('input', render);
+
+            document.getElementById('copy').addEventListener('click', function () {
+                var btn = this;
+                var text = output.value;
+                if (!text) return;
+
+                function done(ok) {
+                    var original = btn.textContent;
+                    btn.textContent = ok ? '已复制' : '复制失败';
+                    setTimeout(function () { btn.textContent = original; }, 1500);
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+                } else {
+                    output.select();
+                    done(document.execCommand && document.execCommand('copy'));
+                }
+            });
+
+            document.getElementById('applyToInput').addEventListener('click', function () {
+                if (!output.value) return;
+                input.value = output.value;
+                render();
+                input.focus();
+            });
+
+            document.getElementById('clear').addEventListener('click', function () {
+                input.value = '';
+                render();
+                input.focus();
+            });
+
+            render();
+        })();
+    </script>
+</body>
+
+</html>
