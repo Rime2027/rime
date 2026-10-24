@@ -3,6 +3,19 @@ if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
 
+// 用 requestAnimationFrame 节流高频事件（scroll 等），避免每次事件都触发样式计算
+function rafThrottle(fn) {
+    let ticking = false;
+    return function (...args) {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            ticking = false;
+            fn.apply(this, args);
+        });
+    };
+}
+
 // 页面加载完成后执行
 document.addEventListener('DOMContentLoaded', function() {
     // 初始化移动端菜单
@@ -10,9 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化实时时间显示
     initTimeDisplay();
-    
-    // 初始化作品卡片点击事件
-    initWorkCards();
     
     // 初始化滚动高亮
     initScrollHighlight();
@@ -69,9 +79,12 @@ function initThemeToggle() {
     
     // 主题切换逻辑
     function toggleTheme() {
+        // 仅在切换瞬间启用全局过渡，避免给所有元素常驻 transition 声明
+        body.classList.add('theme-switching');
         const isDark = body.classList.toggle('dark');
         updateThemeIcon(isDark);
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        window.setTimeout(() => body.classList.remove('theme-switching'), 350);
     }
     
     // 桌面端按钮事件
@@ -157,42 +170,8 @@ function initTimeDisplay() {
     setInterval(updateTime, 1000);
 }
 
-// 作品卡片点击事件
-function initWorkCards() {
-    const workCards = document.querySelectorAll('.work-card');
-    
-    workCards.forEach(card => {
-        // 从data-link属性获取链接
-        const link = card.getAttribute('data-link') || 'https://juejin.cn/user/2232425500384467/posts';
-        
-        // 添加点击事件
-        card.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // 添加点击效果
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 200);
-            
-            // 跳转到指定链接（新标签页打开）
-            window.open(link, '_blank');
-        });
-        
-        // 添加键盘支持
-        card.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                window.open(link, '_blank');
-            }
-        });
-        
-        // 设置可访问性
-        card.setAttribute('tabindex', '0');
-        card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', '查看项目详情');
-    });
-}
+// 作品卡片已改为语义化 <a href>，跳转、键盘可达性、右键菜单均由浏览器原生提供，
+// 不再需要 JS 干预（原实现依赖 window.open，对禁用 JS 的环境和搜索引擎均不可见）。
 
 // 向下探索按钮点击事件
 function initScrollButton() {
@@ -270,8 +249,8 @@ function initScrollHighlight() {
         });
     }
     
-    // 监听滚动事件
-    window.addEventListener('scroll', highlightNavLink);
+    // 监听滚动事件（rAF 节流，避免高频触发样式计算）
+    window.addEventListener('scroll', rafThrottle(highlightNavLink), { passive: true });
     
     // 初始执行一次，处理当前可见区域
     highlightNavLink();
@@ -291,31 +270,28 @@ function initScrollHighlight() {
 // 视差滚动效果
 function initParallax() {
     const hero = document.querySelector('.hero');
-    
-    if (hero && window.innerWidth > 768) {
-        window.addEventListener('scroll', function() {
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * -0.5;
-            
-            // 通过CSS变量控制视差效果
-            hero.style.setProperty('--parallax-rate', `${rate}px`);
-            
-            // 添加CSS变量到样式
-            if (!document.querySelector('#parallax-style')) {
-                const style = document.createElement('style');
-                style.id = 'parallax-style';
-                style.textContent = `
-                    .hero::before {
-                        transform: translateY(var(--parallax-rate, 0px)) rotate(calc(var(--parallax-rate, 0px) * 0.1deg));
-                    }
-                    .hero::after {
-                        transform: translateY(calc(var(--parallax-rate, 0px) * -0.7)) rotate(calc(var(--parallax-rate, 0px) * -0.05deg));
-                    }
-                `;
-                document.head.appendChild(style);
+
+    if (!hero || window.innerWidth <= 768) return;
+
+    // 视差用的 CSS 只注入一次，不放在滚动回调里反复查询与创建
+    if (!document.querySelector('#parallax-style')) {
+        const style = document.createElement('style');
+        style.id = 'parallax-style';
+        style.textContent = `
+            .hero::before {
+                transform: translateY(var(--parallax-rate, 0px)) rotate(calc(var(--parallax-rate, 0px) * 0.1deg));
             }
-        });
+            .hero::after {
+                transform: translateY(calc(var(--parallax-rate, 0px) * -0.7)) rotate(calc(var(--parallax-rate, 0px) * -0.05deg));
+            }
+        `;
+        document.head.appendChild(style);
     }
+
+    window.addEventListener('scroll', rafThrottle(function () {
+        const rate = window.pageYOffset * -0.5;
+        hero.style.setProperty('--parallax-rate', `${rate}px`);
+    }), { passive: true });
 }
 
 // 微信图片灯箱

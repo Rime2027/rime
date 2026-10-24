@@ -232,3 +232,31 @@ test('robots.txt 必须声明 sitemap 且不屏蔽首页', () => {
   assert.match(txt, /^Sitemap:\s*https?:\/\/\S+/m, 'robots.txt 未声明 Sitemap');
   assert.doesNotMatch(txt, /^Disallow:\s*\/\s*$/m, 'robots.txt 屏蔽了整站');
 });
+
+test('首页作品卡片必须是可抓取的语义化链接', () => {
+  const html = read('index.html');
+  const grid = html.match(/<div class="works-grid">([\s\S]*?)\n            <\/div>/);
+  assert.ok(grid, 'index.html 未找到 works-grid 容器');
+
+  const cards = [...grid[1].matchAll(/<a\b[^>]*class="work-card"[^>]*>/g)];
+  assert.equal(cards.length, 15, `作品卡片应为 15 个语义化 <a>，实际 ${cards.length} 个`);
+
+  const bad = cards.filter((m) => !/href="https?:\/\//.test(m[0]));
+  assert.deepEqual(bad.map((m) => m[0]), [], '存在没有合法 http(s) href 的作品卡片');
+
+  assert.doesNotMatch(
+    html,
+    /data-link=/,
+    'index.html 仍残留 data-link 依赖（搜索引擎无法抓取，禁用 JS 时不可点击）',
+  );
+});
+
+test('滚动监听必须经过 rAF 节流', () => {
+  const js = read('script.js');
+  const listeners = [...js.matchAll(/addEventListener\(\s*['"]scroll['"]\s*,\s*([^,)]+)/g)];
+  assert.ok(listeners.length > 0, '未找到任何 scroll 监听，请复核本测试');
+  const unthrottled = listeners
+    .map((m) => m[1].trim())
+    .filter((handler) => !/rafThrottle\(/.test(handler));
+  assert.deepEqual(unthrottled, [], `以下 scroll 监听未节流: ${unthrottled.join(', ')}`);
+});

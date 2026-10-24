@@ -52,12 +52,13 @@ body.dark {
     --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
-/* 平滑的主题切换动画 */
+/* 平滑的主题切换动画：仅在切换瞬间启用全局过渡，避免给每个元素常驻 transition 声明 */
 body {
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-body * {
+body.theme-switching,
+body.theme-switching * {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -370,6 +371,12 @@ body.dark .theme-toggle i {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    text-decoration: none;
+    color: inherit;
+}
+
+.work-card:active {
+    transform: translateY(-4px) scale(0.98);
 }
 
 .work-card::before {
