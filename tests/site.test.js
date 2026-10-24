@@ -11,7 +11,7 @@ const PAGE_FILES = readdirSync(join(ROOT, 'pages'))
   .sort()
   .map((f) => `pages/${f}`);
 
-const HTML_FILES = ['index.html', ...PAGE_FILES];
+const HTML_FILES = ['index.html', '404.html', ...PAGE_FILES];
 
 const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 
@@ -139,4 +139,96 @@ test('page04 脚本动态生成的 _blank 链接必须带 rel 防护', () => {
   const js = read('assets/js/script01.js');
   assert.match(js, /\.target\s*=\s*["']_blank["']/, 'script01.js 不再设置 _blank，请复核本测试');
   assert.match(js, /\.rel\s*=\s*["'][^"']*noopener/, 'script01.js 为 _blank 链接设置 target 时缺少 rel="noopener"');
+});
+
+test('所有 target="_blank" 的链接必须带 rel="noopener"', () => {
+  const offenders = [];
+  for (const file of HTML_FILES) {
+    const html = read(file);
+    for (const m of html.matchAll(/<a\b[^>]*>/g)) {
+      const tag = m[0];
+      if (!/target\s*=\s*"_blank"/.test(tag)) continue;
+      if (/rel\s*=\s*"[^"]*noopener/.test(tag)) continue;
+      const line = html.slice(0, m.index).split('\n').length;
+      offenders.push(`${file}:${line}`);
+    }
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `以下 target="_blank" 链接缺少 rel="noopener"（反向 tabnabbing 风险）:\n${offenders.join('\n')}`,
+  );
+});
+
+test('内联 data-URI 中的 SVG 必须做百分号编码', () => {
+  const offenders = [];
+  for (const file of HTML_FILES) {
+    const html = read(file);
+    const re = /(?:href|src|url\()\s*[='"]?\s*data:image\/svg\+xml,([^"')]*)/g;
+    for (const m of html.matchAll(re)) {
+      if (m[1].includes('<')) {
+        const line = html.slice(0, m.index).split('\n').length;
+        offenders.push(`${file}:${line}`);
+      }
+    }
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `data-URI 内联 SVG 含未编码的 "<"，会被 HTML 解析器当成真实标签:\n${offenders.join('\n')}`,
+  );
+});
+
+test('每个可索引页面必须有独立的 title、description 与 canonical', () => {
+  const seen = new Map();
+  const problems = [];
+  for (const file of HTML_FILES) {
+    const html = read(file);
+    const noindex = /<meta\s+name="robots"[^>]*noindex/i.test(html);
+    const title = html.match(/<title>([^<]*)<\/title>/)?.[1];
+    if (!title) {
+      problems.push(`${file} 缺少 <title>`);
+      continue;
+    }
+    if (noindex) continue;
+
+    const desc = html.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1];
+    const canonical = html.match(/<link\s+rel="canonical"\s+href="([^"]*)"/)?.[1];
+    if (!desc) problems.push(`${file} 缺少 meta description`);
+    if (!canonical) problems.push(`${file} 缺少 canonical`);
+
+    if (seen.has(title)) {
+      problems.push(`${file} 的 title 与 ${seen.get(title)} 重复: "${title}"`);
+    } else {
+      seen.set(title, file);
+    }
+  }
+  assert.deepEqual(problems, [], `SEO 元信息问题:\n${problems.join('\n')}`);
+});
+
+test('sitemap.xml 列出的每个 URL 都必须有对应文件', () => {
+  const xml = read('sitemap.xml');
+  assert.match(
+    xml,
+    /xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/,
+    'sitemap.xml 的 namespace 不正确',
+  );
+
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
+  assert.ok(locs.length > 0, 'sitemap.xml 未包含任何 <loc>');
+
+  const missing = [];
+  for (const loc of locs) {
+    const path = new URL(loc).pathname;
+    const rel = path === '/' ? 'index.html' : path.replace(/^\//, '');
+    if (!existsSync(join(ROOT, rel))) missing.push(`${loc} -> ${rel}`);
+  }
+  assert.deepEqual(missing, [], `sitemap 中的 URL 指向不存在的文件:\n${missing.join('\n')}`);
+});
+
+test('robots.txt 必须声明 sitemap 且不屏蔽首页', () => {
+  const txt = read('robots.txt');
+  assert.match(txt, /^User-agent:\s*\*/m, 'robots.txt 缺少 User-agent 声明');
+  assert.match(txt, /^Sitemap:\s*https?:\/\/\S+/m, 'robots.txt 未声明 Sitemap');
+  assert.doesNotMatch(txt, /^Disallow:\s*\/\s*$/m, 'robots.txt 屏蔽了整站');
 });

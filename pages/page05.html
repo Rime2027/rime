@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>专业软件下载中心 | 官方安全下载</title>
+    <title>专业软件下载中心 | 星宇·航图</title>
+    <meta name="description" content="专业软件下载中心：浏览器、社交、办公、开发与系统工具分类整理，全部指向官方安全下载渠道。">
+    <link rel="canonical" href="https://xyos2.xyz/pages/page05.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="星宇·航图 | XY's Blog">
+    <meta property="og:title" content="专业软件下载中心 | 星宇·航图">
+    <meta property="og:description" content="专业软件下载中心：浏览器、社交、办公、开发与系统工具分类整理，全部指向官方安全下载渠道。">
+    <meta property="og:url" content="https://xyos2.xyz/pages/page05.html">
+    <meta name="twitter:card" content="summary">
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💻</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%BB%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%BB%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -60,7 +68,7 @@ position: absolute;
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+            background: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,0 L100,0 L100,100 Z%22 fill=%22rgba(255,255,255,0.05)%22/%3E%3C/svg%3E');
 background-size: cover;
         }
         
@@ -749,7 +757,7 @@ background-size: cover;
                     <ul class="software-list">
                         ${category.items.map(item => `
                             <li class="software-item">
-                                <a href="${item.url}" target="_blank" class="software-link">
+                                <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="software-link">
                                     <div class="software-icon">${item.icon}</div>
                                     <div class="software-info">
                                         <div class="software-name">${item.name}</div>

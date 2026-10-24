@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /pages/page06.html
+
+Sitemap: https://xyos2.xyz/sitemap.xml
