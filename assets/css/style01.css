@@ -45,3 +45,37 @@ body {
     font-size: 12px;
   }
 }
+
+/* 返回首页入口：固定于左上角，层级高于小球，避免被动画遮挡 */
+.back-home {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 18px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+
+.back-home:hover,
+.back-home:focus-visible {
+  background: rgba(255, 255, 255, 0.38);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+@media (max-width: 480px) {
+  .back-home {
+    top: 10px;
+    left: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}

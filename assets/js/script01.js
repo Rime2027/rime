@@ -36,6 +36,7 @@ function createBall(site) {
   // 设置链接
   ball.href = site.url;
   ball.target = "_blank";
+  ball.rel = "noopener noreferrer";
   // 在球上显示网站名称
   ball.textContent = site.name;
   container.appendChild(ball);
