@@ -3,6 +3,69 @@ if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
 
+// ===== 主题色阶生成：由色相推导整套品牌色阶 =====
+// 关键点：明度不是写死的，而是按 WCAG 对比度反解——
+// 这样用户拖到任意色相（含最难的黄、青）时，主色在浅色/深色下都保持可读。
+function hslToHex(h, s, l) {
+    const sat = s / 100;
+    const lig = l / 100;
+    const k = (n) => (n + h / 30) % 12;
+    const a = sat * Math.min(lig, 1 - lig);
+    const f = (n) => lig - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    const hex = (x) => Math.round(255 * x).toString(16).padStart(2, '0');
+    return `#${hex(f(0))}${hex(f(8))}${hex(f(4))}`.toUpperCase();
+}
+
+function relativeLuminance(hex) {
+    const n = hex.replace('#', '');
+    const ch = [0, 2, 4]
+        .map((i) => parseInt(n.slice(i, i + 2), 16) / 255)
+        .map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+}
+
+function contrastRatio(a, b) {
+    const la = relativeLuminance(a);
+    const lb = relativeLuminance(b);
+    return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * 二分求满足目标对比度的明度。
+ * findMax=true：对白底，找「仍够深」的最亮明度；false：对暗底，找「仍够亮」的最暗明度。
+ */
+function solveLightness(hue, sat, bg, target, findMax) {
+    let lo = 2;
+    let hi = 88;
+    for (let i = 0; i < 22; i += 1) {
+        const mid = (lo + hi) / 2;
+        const ok = contrastRatio(hslToHex(hue, sat, mid), bg) >= target;
+        if (findMax) {
+            if (ok) lo = mid; else hi = mid;
+        } else if (ok) {
+            hi = mid;
+        } else {
+            lo = mid;
+        }
+    }
+    return findMax ? lo : hi;
+}
+
+// 返回 {50,100,200,500,600,700} 的十六进制色阶
+function hueBrandScale(hue) {
+    const h = ((Number(hue) % 360) + 360) % 360;
+    const l600 = solveLightness(h, 68, '#FFFFFF', 4.8, true);   // 浅色卡片上的主色
+    const l500 = solveLightness(h, 72, '#1A1F26', 4.8, false);  // 暗色卡片上的主色
+    return {
+        50: hslToHex(h, 90, 97),
+        100: hslToHex(h, 85, 93),
+        200: hslToHex(h, 78, 84),
+        500: hslToHex(h, 72, l500),
+        600: hslToHex(h, 68, l600),
+        700: hslToHex(h, 65, Math.max(8, l600 - 7)),
+    };
+}
+
 // 用 requestAnimationFrame 节流高频事件（scroll 等），避免每次事件都触发样式计算
 function rafThrottle(fn) {
     let ticking = false;
@@ -49,7 +112,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // 个性化设置：外观模式（浅色 / 深色 / 跟随系统）+ 主题色，持久化到 localStorage
 const THEME_MODE_KEY = 'theme-mode';
 const THEME_ACCENT_KEY = 'theme-accent';
+const THEME_HUE_KEY = 'theme-hue';
 const THEME_ACCENTS = ['blue', 'teal', 'violet', 'amber', 'slate'];
+const BRAND_STEPS = ['50', '100', '200', '500', '600', '700'];
 
 function initThemeSettings() {
     const body = document.body;
@@ -62,6 +127,8 @@ function initThemeSettings() {
     ].filter(Boolean);
     const modeBtns = Array.from(document.querySelectorAll('.theme-mode'));
     const accentBtns = Array.from(document.querySelectorAll('.theme-accent'));
+    const hueSlider = document.getElementById('hueSlider');
+    const hueValue = document.getElementById('hueValue');
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     function currentMode() {
@@ -92,10 +159,32 @@ function initThemeSettings() {
         });
     }
 
+    // 清除滑块产生的内联色阶，让预设主题色重新生效
+    function clearInlineBrand() {
+        BRAND_STEPS.forEach((step) => body.style.removeProperty(`--brand-${step}`));
+    }
+
+    // 按色相实时生成整套色阶并写回 CSS 变量（拖动过程中即生效）
+    function applyHue(hue, persist) {
+        const h = Math.round(((Number(hue) % 360) + 360) % 360);
+        const scale = hueBrandScale(h);
+        BRAND_STEPS.forEach((step) => {
+            body.style.setProperty(`--brand-${step}`, scale[step]);
+        });
+        if (hueSlider) hueSlider.value = String(h);
+        if (hueValue) hueValue.textContent = `${h}°`;
+        if (persist) localStorage.setItem(THEME_HUE_KEY, String(h));
+    }
+
     // 初始化：先应用再显示，避免闪烁
     applyTheme(currentMode(), false);
     const savedAccent = localStorage.getItem(THEME_ACCENT_KEY);
     applyAccent(THEME_ACCENTS.includes(savedAccent) ? savedAccent : 'blue');
+
+    const savedHue = localStorage.getItem(THEME_HUE_KEY);
+    if (savedHue !== null && Number.isFinite(Number(savedHue))) {
+        applyHue(Number(savedHue), false);
+    }
 
     // 面板开关
     function setPanelOpen(open) {
@@ -131,9 +220,16 @@ function initThemeSettings() {
         btn.addEventListener('click', () => {
             const accent = btn.dataset.accent;
             localStorage.setItem(THEME_ACCENT_KEY, accent);
+            localStorage.removeItem(THEME_HUE_KEY);
+            clearInlineBrand();
             applyAccent(accent);
         });
     });
+
+    // 拖动色相滑块：实时改主题色，松手前就已在页面上生效
+    if (hueSlider) {
+        hueSlider.addEventListener('input', (e) => applyHue(e.target.value, true));
+    }
 
     // 系统外观变化时，仅在「跟随系统」下响应
     mediaQuery.addEventListener('change', () => {
@@ -445,8 +541,8 @@ function initCustomCursor() {
         ringX += dx * ease;
         ringY += dy * ease;
 
-        // 圆环半径 17px（常态）／29px（悬停放大），减去中心点半径与 2px 内边距
-        const maxOffset = document.body.classList.contains('cursor-hover') ? 22 : 13;
+        // 圆环半径 21px（常态）／34px（悬停放大），减去中心点半径与 2px 内边距
+        const maxOffset = document.body.classList.contains('cursor-hover') ? 28 : 16;
         const ox = targetX - ringX;
         const oy = targetY - ringY;
         const od = Math.hypot(ox, oy);

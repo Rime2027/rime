@@ -449,3 +449,121 @@ test('所有主题组合下关键文字对比度满足 WCAG AA', () => {
 
   assert.deepEqual(failures, [], `以下配色对比度不足:\n${failures.join('\n')}`);
 });
+
+// ---- 色相滑块：任意色相下的对比度不变量 ----
+async function loadScriptContext() {
+  const vm = (await import('node:vm')).default;
+  const src = read('script.js');
+
+  const makeEl = () => ({
+    dataset: {},
+    style: { setProperty() {} },
+    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    setAttribute() {},
+    getAttribute() { return null; },
+    addEventListener() {},
+    append() {},
+    appendChild() {},
+    querySelector() { return null; },
+    querySelectorAll() { return []; },
+    textContent: '',
+  });
+
+  const ctx = {
+    document: {
+      body: makeEl(),
+      documentElement: makeEl(),
+      head: makeEl(),
+      getElementById() { return null; },
+      querySelectorAll() { return []; },
+      querySelector() { return null; },
+      createElement() { return makeEl(); },
+      createTextNode() { return {}; },
+      addEventListener() {},
+    },
+    window: {
+      matchMedia: () => ({ matches: false, addEventListener() {} }),
+      addEventListener() {},
+      setTimeout: (fn) => fn(),
+      innerWidth: 1280,
+      innerHeight: 800,
+      pageYOffset: 0,
+      requestAnimationFrame: (fn) => fn(),
+    },
+    localStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
+    history: {},
+    console: { log() {} },
+    setTimeout: (fn) => fn(),
+    requestAnimationFrame: (fn) => fn(),
+    Node: { TEXT_NODE: 3 },
+    Element: function () {},
+    Math,
+    Date,
+  };
+
+  vm.createContext(ctx);
+  vm.runInContext(src, ctx);
+  return ctx;
+}
+
+test('色相滑块：任意色相下主色对比度都达标', async () => {
+  const ctx = await loadScriptContext();
+  assert.equal(typeof ctx.hueBrandScale, 'function', 'script.js 应提供 hueBrandScale(hue) 生成色阶');
+
+  const DARK_BG = '#1A1F26'; // 暗色卡片底
+  const WHITE = '#FFFFFF';
+
+  const lightFails = [];
+  const darkFails = [];
+
+  for (let h = 0; h < 360; h += 5) {
+    const scale = ctx.hueBrandScale(h);
+    assert.ok(scale['600'] && scale['500'], `hue=${h} 色阶缺少 600/500`);
+
+    const lightRatio = contrastRatio(hexToRgb(scale['600']), hexToRgb(WHITE));
+    if (lightRatio < 4.5) lightFails.push(`hue=${h} 600=${scale['600']} ${lightRatio.toFixed(2)}`);
+
+    const darkRatio = contrastRatio(hexToRgb(scale['500']), hexToRgb(DARK_BG));
+    if (darkRatio < 4.5) darkFails.push(`hue=${h} 500=${scale['500']} ${darkRatio.toFixed(2)}`);
+  }
+
+  assert.deepEqual(
+    lightFails.slice(0, 5),
+    [],
+    `浅色模式下以下色相主色对比度不足 4.5:\n${lightFails.slice(0, 5).join('\n')}`,
+  );
+  assert.deepEqual(
+    darkFails.slice(0, 5),
+    [],
+    `暗色模式下以下色相主色对比度不足 4.5:\n${darkFails.slice(0, 5).join('\n')}`,
+  );
+});
+
+test('个性化面板包含色相滑块并持久化', () => {
+  const html = read('index.html');
+  assert.match(html, /id="hueSlider"/, '面板缺少色相滑块');
+  assert.match(html, /type="range"/, '色相控件应为 range 输入');
+
+  const js = read('script.js');
+  assert.match(js, /hueSlider/, 'script.js 未绑定色相滑块');
+  assert.match(js, /THEME_HUE_KEY|theme-hue/, '色相未持久化');
+  assert.match(js, /setProperty\(\s*[`'"]--brand-/, '未把生成的色阶写回 CSS 变量');
+});
+
+test('首页 Hero 独占首屏且带渐变', () => {
+  const css = read('style.css');
+  const hero = css.match(/\.hero\s*\{([^}]*)\}/);
+  assert.ok(hero, '未找到 .hero 规则');
+  const block = hero[1];
+  assert.match(block, /min-height:\s*(100vh|100svh)/, 'Hero 应独占首屏高度');
+  assert.match(block, /background[^;]*gradient/, 'Hero 背景应为渐变');
+});
+
+test('page07 顶部栏与首页导航尺寸一致', () => {
+  const page = read('pages/page07.html');
+  const css = read('style.css');
+  const nav = css.match(/\.nav-container\s*\{([^}]*)\}/);
+  assert.ok(nav, '未找到 .nav-container');
+  assert.match(nav[1], /padding:\s*var\(--space-sm\)/, '首页导航内边距应使用统一变量');
+  assert.match(page, /height:\s*64px/, 'page07 顶部栏高度应为 64px 与首页对齐');
+});
