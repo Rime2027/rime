@@ -66,6 +66,9 @@ body {
     --color-primary: var(--brand-600);
     --color-primary-hover: var(--brand-700);
     --color-primary-soft: var(--brand-50);
+    /* Hero 标题渐变：两端色阶必须不同，否则看不出渐变。
+       浅色用「深蓝 → 中蓝」，整体仍在 3:1 以上（大号粗体按 WCAG Large 判定）。 */
+    --hero-gradient: linear-gradient(100deg, var(--brand-700) 0%, var(--brand-500) 100%);
 }
 
 /* ---- 暗色：中性近黑，靠边框而非投影区分层次 ---- */
@@ -95,6 +98,9 @@ body.dark {
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45);
     --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
     --shadow-glow: none;
+
+    /* 暗色下渐变改为「浅蓝 → 中蓝」，保证在近黑背景上依然明亮可读 */
+    --hero-gradient: linear-gradient(100deg, var(--brand-200) 0%, var(--brand-500) 100%);
 }
 
 /* ---- 主题色预设：只覆盖色阶，语义变量自动跟随 ---- */

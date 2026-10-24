@@ -621,8 +621,7 @@ test('Hero 标题跟随主题色并带渐变', () => {
   assert.ok(title, '未找到 .hero-title');
   assert.match(title[1], /gradient/, 'Hero 标题应使用渐变');
   assert.match(title[1], /background-clip:\s*text/, '渐变需裁剪到文字');
-  assert.match(title[1], /var\(--color-primary/, '渐变色应引用主题变量，才能随主题变化');
-  assert.match(title[1], /var\(--brand-|var\(--color-primary/, '渐变色应使用品牌色阶');
+  assert.match(title[1], /var\(--hero-gradient\)/, '渐变色应引用 --hero-gradient（内部走品牌色阶，随主题变化）');
 });
 
 test('导航栏为半透明渐变', () => {
@@ -655,4 +654,29 @@ test('404 页为直角大字号，不使用圆角卡片', () => {
   assert.match(html, /font-size:\s*clamp\(\s*6rem/, '404 数字字号应足够大（clamp 起点 6rem）');
   assert.match(html, /assets\/css\/tokens\.css/, '404 页应复用 tokens.css 的默认配色');
   assert.doesNotMatch(html, /class="card"/, '404 页不再使用卡片容器');
+});
+
+test('Hero 标题渐变在浅色与深色下都有足够色差', () => {
+  const tokens = read('assets/css/tokens.css');
+  const bodyBlock = tokens.match(/(?:^|\n)body\s*\{([^}]*)\}/)[1];
+  const darkBlock = tokens.match(/body\.dark\s*\{([^}]*)\}/)[1];
+
+  assert.match(bodyBlock, /--hero-gradient:\s*linear-gradient/, '浅色需定义 --hero-gradient');
+  assert.match(darkBlock, /--hero-gradient:/, '深色需覆盖 --hero-gradient');
+
+  const css = read('style.css');
+  const title = css.match(/\.hero-title\s*\{([^}]*)\}/)[1];
+  assert.match(title, /var\(--hero-gradient\)/, 'Hero 标题应使用 --hero-gradient 变量');
+  assert.match(title, /background-clip:\s*text/, '渐变需裁剪到文字');
+
+  // 渐变两端必须引用不同的色阶（同一变量两端＝看不出渐变）
+  const lightGradient = bodyBlock.match(/--hero-gradient:\s*([^;]+)/)[1];
+  const lightStops = [...lightGradient.matchAll(/var\((--[\w-]+)\)/g)].map((m) => m[1]);
+  assert.ok(lightStops.length >= 2, '浅色渐变应至少有两个色标');
+  assert.notEqual(lightStops[0], lightStops[lightStops.length - 1], '渐变首尾不能是同一个色阶变量');
+
+  const darkGradient = darkBlock.match(/--hero-gradient:\s*([^;]+)/)[1];
+  const darkStops = [...darkGradient.matchAll(/var\((--[\w-]+)\)/g)].map((m) => m[1]);
+  assert.ok(darkStops.length >= 2, '深色渐变应至少有两个色标');
+  assert.notEqual(darkStops[0], darkStops[darkStops.length - 1], '深色渐变首尾不能是同一个色阶变量');
 });
