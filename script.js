@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initParallax();
     
     // 初始化夜间模式切换
-    initThemeToggle();
+    initThemeSettings();
 
     // 初始化 QQ 群二维码灯箱
     initQQLightbox();
@@ -46,70 +46,98 @@ document.addEventListener('DOMContentLoaded', function() {
     initCustomCursor();
 });
 
-// 夜间模式切换功能
-function initThemeToggle() {
-    const themeToggle = document.getElementById('themeToggle');
-    const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+// 个性化设置：外观模式（浅色 / 深色 / 跟随系统）+ 主题色，持久化到 localStorage
+const THEME_MODE_KEY = 'theme-mode';
+const THEME_ACCENT_KEY = 'theme-accent';
+const THEME_ACCENTS = ['blue', 'teal', 'violet', 'amber', 'slate'];
+
+function initThemeSettings() {
     const body = document.body;
-    
-    // 检查本地存储中的主题偏好
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    // 初始化主题
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        body.classList.add('dark');
-        updateThemeIcon(true);
+    const panel = document.getElementById('themePanel');
+    if (!panel) return;
+
+    const triggers = [
+        document.getElementById('themeSettingsBtn'),
+        document.getElementById('mobileThemeSettingsBtn'),
+    ].filter(Boolean);
+    const modeBtns = Array.from(document.querySelectorAll('.theme-mode'));
+    const accentBtns = Array.from(document.querySelectorAll('.theme-accent'));
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function currentMode() {
+        const saved = localStorage.getItem(THEME_MODE_KEY);
+        return (saved === 'light' || saved === 'dark' || saved === 'system') ? saved : 'system';
     }
-    
-    // 更新主题图标
-    function updateThemeIcon(isDark) {
-        const icons = document.querySelectorAll('.theme-toggle i');
-        icons.forEach(icon => {
-            if (isDark) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            }
+
+    function resolveDark(mode) {
+        return mode === 'dark' || (mode === 'system' && mediaQuery.matches);
+    }
+
+    function applyTheme(mode, animate) {
+        if (animate) {
+            // 仅在切换瞬间启用全局过渡，避免给所有元素常驻 transition 声明
+            body.classList.add('theme-switching');
+            window.setTimeout(() => body.classList.remove('theme-switching'), 350);
+        }
+        body.classList.toggle('dark', resolveDark(mode));
+        modeBtns.forEach(btn => {
+            btn.setAttribute('aria-checked', String(btn.dataset.mode === mode));
         });
-        // 更新移动端按钮文字
-        if (mobileThemeToggle) {
-            const textNode = Array.from(mobileThemeToggle.childNodes).find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
-            if (textNode) {
-                textNode.textContent = isDark ? ' 日间模式' : ' 夜间模式';
-            }
-        }
     }
-    
-    // 主题切换逻辑
-    function toggleTheme() {
-        // 仅在切换瞬间启用全局过渡，避免给所有元素常驻 transition 声明
-        body.classList.add('theme-switching');
-        const isDark = body.classList.toggle('dark');
-        updateThemeIcon(isDark);
-        localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        window.setTimeout(() => body.classList.remove('theme-switching'), 350);
+
+    function applyAccent(accent) {
+        body.dataset.accent = accent;
+        accentBtns.forEach(btn => {
+            btn.setAttribute('aria-checked', String(btn.dataset.accent === accent));
+        });
     }
-    
-    // 桌面端按钮事件
-    if (themeToggle) {
-        themeToggle.addEventListener('click', toggleTheme);
+
+    // 初始化：先应用再显示，避免闪烁
+    applyTheme(currentMode(), false);
+    const savedAccent = localStorage.getItem(THEME_ACCENT_KEY);
+    applyAccent(THEME_ACCENTS.includes(savedAccent) ? savedAccent : 'blue');
+
+    // 面板开关
+    function setPanelOpen(open) {
+        panel.classList.toggle('is-open', open);
+        panel.setAttribute('aria-hidden', String(!open));
+        triggers.forEach(t => t.setAttribute('aria-expanded', String(open)));
     }
-    
-    // 移动端按钮事件
-    if (mobileThemeToggle) {
-        mobileThemeToggle.addEventListener('click', toggleTheme);
-    }
-    
-    // 监听系统主题变化
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        if (!localStorage.getItem('theme')) {
-            const isDark = e.matches;
-            body.classList.toggle('dark', isDark);
-            updateThemeIcon(isDark);
-        }
+
+    triggers.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setPanelOpen(!panel.classList.contains('is-open'));
+        });
+    });
+
+    panel.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('click', () => {
+        if (panel.classList.contains('is-open')) setPanelOpen(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.classList.contains('is-open')) setPanelOpen(false);
+    });
+
+    modeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mode = btn.dataset.mode;
+            localStorage.setItem(THEME_MODE_KEY, mode);
+            applyTheme(mode, true);
+        });
+    });
+
+    accentBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const accent = btn.dataset.accent;
+            localStorage.setItem(THEME_ACCENT_KEY, accent);
+            applyAccent(accent);
+        });
+    });
+
+    // 系统外观变化时，仅在「跟随系统」下响应
+    mediaQuery.addEventListener('change', () => {
+        if (currentMode() === 'system') applyTheme('system', true);
     });
 }
 

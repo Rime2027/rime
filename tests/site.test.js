@@ -315,3 +315,53 @@ test('自定义光标在触屏与减少动效偏好下应降级', () => {
   assert.match(css, /\.cursor-ring/, '缺少光标圆环样式');
   assert.match(css, /body\.custom-cursor/, '缺少隐藏系统光标的样式');
 });
+
+test('设计令牌集中在 tokens.css 并被首页引用', () => {
+  const html = read('index.html');
+  assert.match(html, /assets\/css\/tokens\.css/, 'index.html 未引用 tokens.css');
+
+  const tokens = read('assets/css/tokens.css');
+  for (const v of ['--color-bg', '--color-card', '--color-primary', '--color-border', '--color-bg-subtle']) {
+    assert.ok(tokens.includes(`${v}:`), `tokens.css 缺少 ${v}`);
+  }
+
+  const css = read('style.css');
+  assert.doesNotMatch(css, /^:root\s*\{/m, 'style.css 仍自定义 :root，令牌应由 tokens.css 统一提供');
+  assert.doesNotMatch(css, /^body\.dark\s*\{/m, 'style.css 仍自定义暗色变量，应由 tokens.css 统一提供');
+});
+
+test('个性化面板提供三种外观模式与多个主题色', () => {
+  const html = read('index.html');
+
+  const modes = [...html.matchAll(/data-mode="(\w+)"/g)].map((m) => m[1]).sort();
+  assert.deepEqual(modes, ['dark', 'light', 'system'], '外观模式应为 浅色/深色/跟随系统');
+
+  const accents = [...html.matchAll(/class="theme-accent"[^>]*data-accent="(\w+)"/g)].map((m) => m[1]);
+  assert.ok(accents.length >= 4, `主题色应至少 4 种，实际 ${accents.length}`);
+
+  const tokens = read('assets/css/tokens.css');
+  for (const a of accents) {
+    assert.ok(tokens.includes(`data-accent="${a}"`), `tokens.css 缺少主题色 ${a} 的定义`);
+  }
+});
+
+test('主题选择持久化并响应系统外观变化', () => {
+  const js = read('script.js');
+  assert.match(js, /initThemeSettings/, 'script.js 缺少 initThemeSettings');
+  assert.match(js, /localStorage\.setItem\(THEME_MODE_KEY/, '外观模式未持久化');
+  assert.match(js, /localStorage\.setItem\(THEME_ACCENT_KEY/, '主题色未持久化');
+  assert.match(js, /prefers-color-scheme: dark/, '未监听系统外观偏好');
+  assert.match(js, /data-accent|dataset\.accent/, '未把主题色写到 body 上');
+});
+
+test('常用链接页在首页与 sitemap 中可达，且复用同一套令牌', () => {
+  const html = read('index.html');
+  assert.match(html, /href="pages\/page07\.html"/, '首页缺少「常用链接」入口');
+
+  const sitemap = read('sitemap.xml');
+  assert.match(sitemap, /pages\/page07\.html/, 'sitemap 缺少 page07');
+
+  const page = read('pages/page07.html');
+  assert.match(page, /assets\/css\/tokens\.css/, 'page07 未复用 tokens.css，主题自定义不会生效');
+  assert.match(page, /localStorage\.getItem\('theme-mode'\)/, 'page07 未继承首页的主题偏好');
+});

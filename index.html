@@ -13,6 +13,7 @@
     <meta property="og:url" content="https://xyos2.xyz/">
     <meta property="og:locale" content="zh_CN">
     <meta name="twitter:card" content="summary">
+    <link rel="stylesheet" href="assets/css/tokens.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,9 +59,9 @@
                     <i class="fas fa-book"></i> 教程文档
                 </a>
                 
-                <!-- 夜间模式切换按钮 -->
-                <button class="theme-toggle" id="themeToggle" aria-label="切换夜间模式">
-                    <i class="fas fa-moon"></i>
+                <!-- 个性化设置：外观模式 + 主题色 -->
+                <button class="theme-toggle" id="themeSettingsBtn" aria-label="个性化设置" aria-expanded="false" aria-controls="themePanel">
+                    <i class="fas fa-palette"></i>
                 </button>
             </div>
             
@@ -97,12 +98,51 @@
                 <i class="fas fa-book"></i> 教程文档
             </a>
             
-            <!-- 移动端夜间模式切换按钮 -->
-            <button class="theme-toggle nav-mobile-link" id="mobileThemeToggle" aria-label="切换夜间模式">
-                <i class="fas fa-moon"></i> 夜间模式
+            <!-- 移动端个性化设置 -->
+            <button class="theme-toggle nav-mobile-link" id="mobileThemeSettingsBtn" aria-label="个性化设置" aria-expanded="false" aria-controls="themePanel">
+                <i class="fas fa-palette"></i> 个性化设置
             </button>
         </div>
     </nav>
+
+    <!-- 个性化设置面板 -->
+    <div class="theme-panel" id="themePanel" role="dialog" aria-label="个性化设置" aria-hidden="true">
+        <div class="theme-panel__section">
+            <p class="theme-panel__label">外观</p>
+            <div class="theme-modes" role="radiogroup" aria-label="外观模式">
+                <button type="button" class="theme-mode" data-mode="light" role="radio" aria-checked="false">
+                    <i class="fas fa-sun"></i><span>浅色</span>
+                </button>
+                <button type="button" class="theme-mode" data-mode="dark" role="radio" aria-checked="false">
+                    <i class="fas fa-moon"></i><span>深色</span>
+                </button>
+                <button type="button" class="theme-mode" data-mode="system" role="radio" aria-checked="false">
+                    <i class="fas fa-circle-half-stroke"></i><span>跟随系统</span>
+                </button>
+            </div>
+        </div>
+        <div class="theme-panel__section">
+            <p class="theme-panel__label">主题色</p>
+            <div class="theme-accents" role="radiogroup" aria-label="主题色">
+                <button type="button" class="theme-accent" data-accent="blue" role="radio" aria-checked="false" aria-label="靛蓝">
+                    <span style="--swatch:#2563EB"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="teal" role="radio" aria-checked="false" aria-label="青碧">
+                    <span style="--swatch:#0D9488"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="violet" role="radio" aria-checked="false" aria-label="紫罗兰">
+                    <span style="--swatch:#7C3AED"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="amber" role="radio" aria-checked="false" aria-label="琥珀">
+                    <span style="--swatch:#B45309"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="slate" role="radio" aria-checked="false" aria-label="石墨">
+                    <span style="--swatch:#475569"></span>
+                </button>
+            </div>
+        </div>
+        <p class="theme-panel__hint">选择会保存在本机，下次打开自动应用</p>
+    </div>
 
     <!-- Hero 区域 -->
     <section id="home" class="hero">
@@ -331,6 +371,21 @@
                         <p class="tool-desc">官方安全下载渠道</p>
                         <div class="tool-footer">
                             <span class="tool-tag">工具</span>
+                            <span class="tool-arrow">→</span>
+                        </div>
+                    </a>
+
+                    <a href="pages/page07.html" class="tool-card" target="_blank" rel="noopener noreferrer">
+                        <div class="tool-header">
+                            <div class="tool-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <span class="tool-badge">新增</span>
+                        </div>
+                        <h3 class="tool-title">常用链接</h3>
+                        <p class="tool-desc">笔记、教程与资源分类入口</p>
+                        <div class="tool-footer">
+                            <span class="tool-tag">导航</span>
                             <span class="tool-arrow">→</span>
                         </div>
                     </a>
