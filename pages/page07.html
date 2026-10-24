@@ -535,17 +535,8 @@
     </footer>
 
     <script>
-        // 沿用首页的主题偏好（外观模式 + 主题色）
+        // 本页固定使用 tokens.css 的默认配色，不跟随主页面的个性化主题
         (function () {
-            var body = document.body;
-            var mode = localStorage.getItem('theme-mode') || 'system';
-            var accent = localStorage.getItem('theme-accent') || 'blue';
-            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
-
-            if (isDark) body.classList.add('dark');
-            body.dataset.accent = accent;
-
             var yearEl = document.getElementById('footYear');
             if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 

@@ -363,7 +363,7 @@ test('常用链接页在首页与 sitemap 中可达，且复用同一套令牌',
 
   const page = read('pages/page07.html');
   assert.match(page, /assets\/css\/tokens\.css/, 'page07 未复用 tokens.css，主题自定义不会生效');
-  assert.match(page, /localStorage\.getItem\('theme-mode'\)/, 'page07 未继承首页的主题偏好');
+  assert.match(page, /assets\/css\/tokens\.css/, 'page07 未复用 tokens.css 的默认配色');
 });
 
 // ---- 色彩对比度（WCAG AA）机械校验：改色后仍保证文字可读 ----
@@ -504,13 +504,17 @@ async function loadScriptContext() {
   };
 
   vm.createContext(ctx);
+  // 色阶算法在 theme-color.js，首页与子页面共用，先加载它
+  vm.runInContext(read('assets/js/theme-color.js'), ctx);
   vm.runInContext(src, ctx);
   return ctx;
 }
 
 test('色相滑块：任意色相下主色对比度都达标', async () => {
   const ctx = await loadScriptContext();
-  assert.equal(typeof ctx.hueBrandScale, 'function', 'script.js 应提供 hueBrandScale(hue) 生成色阶');
+  const ThemeColor = ctx.window.ThemeColor;
+  assert.ok(ThemeColor && typeof ThemeColor.hueBrandScale === 'function',
+    'theme-color.js 应提供 hueBrandScale(hue) 生成色阶');
 
   const DARK_BG = '#1A1F26'; // 暗色卡片底
   const WHITE = '#FFFFFF';
@@ -519,7 +523,7 @@ test('色相滑块：任意色相下主色对比度都达标', async () => {
   const darkFails = [];
 
   for (let h = 0; h < 360; h += 5) {
-    const scale = ctx.hueBrandScale(h);
+    const scale = ThemeColor.hueBrandScale(h);
     assert.ok(scale['600'] && scale['500'], `hue=${h} 色阶缺少 600/500`);
 
     const lightRatio = contrastRatio(hexToRgb(scale['600']), hexToRgb(WHITE));
@@ -628,4 +632,27 @@ test('导航栏为半透明渐变', () => {
   assert.match(nav[1], /gradient/, '导航栏背景应为渐变');
   assert.match(nav[1], /color-mix|rgba\(/, '渐变应带透明度');
   assert.match(nav[1], /backdrop-filter/, '半透明导航应配 backdrop-filter');
+});
+
+test('子页面使用默认配色，不跟随主页面的个性化主题', () => {
+  for (const file of PAGE_FILES) {
+    const html = read(file);
+    assert.doesNotMatch(
+      html,
+      /subpage-theme\.js/,
+      `${file} 不应引入 subpage-theme.js —— 主题设置只作用于主页面`,
+    );
+  }
+});
+
+test('404 页为直角大字号，不使用圆角卡片', () => {
+  const html = read('404.html');
+
+  const radii = [...html.matchAll(/border-radius:\s*([^;]+);/g)].map((m) => m[1].trim());
+  const rounded = radii.filter((r) => r !== '0');
+  assert.deepEqual(rounded, [], `404 页应全部使用直角，发现圆角: ${rounded.join(', ')}`);
+
+  assert.match(html, /font-size:\s*clamp\(\s*6rem/, '404 数字字号应足够大（clamp 起点 6rem）');
+  assert.match(html, /assets\/css\/tokens\.css/, '404 页应复用 tokens.css 的默认配色');
+  assert.doesNotMatch(html, /class="card"/, '404 页不再使用卡片容器');
 });
