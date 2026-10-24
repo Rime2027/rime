@@ -424,6 +424,8 @@ test('所有主题组合下关键文字对比度满足 WCAG AA', () => {
   for (const dark of [false, true]) {
     for (const accent of accents) {
       const vars = { ...parseTokenBlock(tokens, ':root') };
+      // --color-primary 系列声明在 body 上（见上一条测试），需一并合并
+      Object.assign(vars, parseTokenBlock(tokens, 'body'));
       Object.assign(vars, parseTokenBlock(tokens, `body[data-accent="${accent}"]`));
       if (dark) {
         Object.assign(vars, parseTokenBlock(tokens, 'body.dark'));
@@ -566,4 +568,64 @@ test('page07 顶部栏与首页导航尺寸一致', () => {
   assert.ok(nav, '未找到 .nav-container');
   assert.match(nav[1], /padding:\s*var\(--space-sm\)/, '首页导航内边距应使用统一变量');
   assert.match(page, /height:\s*64px/, 'page07 顶部栏高度应为 64px 与首页对齐');
+});
+
+test('主题色语义变量必须在 body 上声明，否则浅色模式换色不生效', () => {
+  const tokens = read('assets/css/tokens.css');
+
+  const rootMatch = tokens.match(/:root\s*\{([^}]*)\}/);
+  assert.ok(rootMatch, 'tokens.css 缺少 :root 块');
+  const rootBlock = rootMatch[1];
+
+  const bodyMatch = tokens.match(/(?:^|\n)body\s*\{([^}]*)\}/);
+  assert.ok(bodyMatch, 'tokens.css 缺少 body 块');
+  const bodyBlock = bodyMatch[1];
+
+  // CSS 自定义属性继承的是「计算值」：写在 :root 上的 var(--brand-600) 会在 :root 解析完，
+  // 之后 body 上改 --brand-600 不会让继承来的 --color-primary 重算。
+  assert.doesNotMatch(
+    rootBlock,
+    /--color-primary\s*:/,
+    ':root 不应声明 --color-primary —— 继承的是计算值，换主题色时不会重算',
+  );
+  assert.doesNotMatch(
+    rootBlock,
+    /--color-primary-hover\s*:|--color-primary-soft\s*:/,
+    ':root 不应声明 --color-primary-hover / --color-primary-soft，原因同上',
+  );
+
+  assert.match(
+    bodyBlock,
+    /--color-primary\s*:\s*var\(--brand-600\)/,
+    'body 应声明 --color-primary: var(--brand-600)，才能随 data-accent 变化',
+  );
+  assert.match(
+    bodyBlock,
+    /--color-primary-hover\s*:\s*var\(--brand-700\)/,
+    'body 应声明 --color-primary-hover',
+  );
+  assert.match(
+    bodyBlock,
+    /--color-primary-soft\s*:\s*var\(--brand-50\)/,
+    'body 应声明 --color-primary-soft',
+  );
+});
+
+test('Hero 标题跟随主题色并带渐变', () => {
+  const css = read('style.css');
+  const title = css.match(/\.hero-title\s*\{([^}]*)\}/);
+  assert.ok(title, '未找到 .hero-title');
+  assert.match(title[1], /gradient/, 'Hero 标题应使用渐变');
+  assert.match(title[1], /background-clip:\s*text/, '渐变需裁剪到文字');
+  assert.match(title[1], /var\(--color-primary/, '渐变色应引用主题变量，才能随主题变化');
+  assert.match(title[1], /var\(--brand-|var\(--color-primary/, '渐变色应使用品牌色阶');
+});
+
+test('导航栏为半透明渐变', () => {
+  const css = read('style.css');
+  const nav = css.match(/\.navbar\s*\{([^}]*)\}/);
+  assert.ok(nav, '未找到 .navbar');
+  assert.match(nav[1], /gradient/, '导航栏背景应为渐变');
+  assert.match(nav[1], /color-mix|rgba\(/, '渐变应带透明度');
+  assert.match(nav[1], /backdrop-filter/, '半透明导航应配 backdrop-filter');
 });

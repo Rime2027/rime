@@ -19,10 +19,7 @@
     --brand-600: #2563EB;
     --brand-700: #1D4ED8;
 
-    /* ---- 语义色 ---- */
-    --color-primary: var(--brand-600);
-    --color-primary-hover: var(--brand-700);
-    --color-primary-soft: var(--brand-50);
+    /* ---- 语义色中不引用色阶的部分 ---- */
     --color-secondary: #6366F1;
     --color-accent: #B45309;
 
@@ -59,6 +56,16 @@
     --space-md: 1.5rem;
     --space-lg: 2rem;
     --space-xl: 3rem;
+}
+
+/* 引用色阶的语义变量必须声明在 body 上。
+   CSS 自定义属性继承的是「计算值」而非原始 token：
+   若把它们写在 :root，var(--brand-600) 会在 :root 就解析成默认蓝，
+   之后 body 上覆盖 --brand-* 不会让它们重算 —— 浅色模式下换主题色就会失效。 */
+body {
+    --color-primary: var(--brand-600);
+    --color-primary-hover: var(--brand-700);
+    --color-primary-soft: var(--brand-50);
 }
 
 /* ---- 暗色：中性近黑，靠边框而非投影区分层次 ---- */

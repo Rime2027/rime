@@ -59,8 +59,11 @@ body {
 
 /* ===== 导航栏样式 ===== */
 .navbar {
-    background-color: var(--color-card);
-    backdrop-filter: blur(10px);
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--color-card) 94%, transparent) 0%,
+        color-mix(in srgb, var(--color-card) 72%, transparent) 100%);
+    backdrop-filter: blur(14px) saturate(1.5);
+    -webkit-backdrop-filter: blur(14px) saturate(1.5);
     border-bottom: 1px solid var(--color-border);
     position: fixed;
     top: 0;
@@ -170,6 +173,15 @@ body.dark .theme-toggle i {
     background-color: var(--color-hover);
 }
 
+/* 主导航与社交链接之间的分隔 */
+.nav-divider {
+    width: 1px;
+    height: 18px;
+    margin: 0 4px;
+    background-color: var(--color-border);
+    flex: none;
+}
+
 .nav-external {
     position: relative;
 }
@@ -264,12 +276,18 @@ body.dark .theme-toggle i {
 }
 
 .hero-title {
-    font-size: 3rem;
-    font-weight: 650;
-    letter-spacing: -0.025em;
+    font-size: 3.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     margin-bottom: var(--space-sm);
-    color: var(--color-text-dark);
-    line-height: 1.15;
+    line-height: 1.12;
+    background: linear-gradient(100deg,
+        var(--color-primary) 0%,
+        var(--color-primary-hover) 52%,
+        var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .hero-subtitle {
@@ -547,7 +565,7 @@ body.dark .theme-toggle i {
 /* ===== 响应式设计 ===== */
 @media (max-width: 1024px) {
     .hero-title {
-        font-size: 2.4rem;
+        font-size: 3rem;
     }
 
     .nav-menu {
@@ -585,7 +603,7 @@ body.dark .theme-toggle i {
     }
     
     .hero-title {
-        font-size: 1.9rem;
+        font-size: 2.2rem;
     }
     
     .hero-subtitle {
@@ -631,7 +649,7 @@ body.dark .theme-toggle i {
     }
     
     .hero-title {
-        font-size: 1.6rem;
+        font-size: 1.9rem;
     }
     
     .section {
