@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开发工具箱 | 星宇·航图</title>
+    <meta name="description" content="常用开发小工具：时间戳转换、JSON 格式化与压缩、Base64 编解码、URL 编解码，全部在本地运行。">
+    <link rel="canonical" href="https://xyos2.xyz/pages/page08.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="星宇·航图 | XY's Blog">
+    <meta property="og:title" content="开发工具箱 | 星宇·航图">
+    <meta property="og:description" content="常用开发小工具：时间戳转换、JSON 格式化与压缩、Base64 编解码、URL 编解码。">
+    <meta property="og:url" content="https://xyos2.xyz/pages/page08.html">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%90%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../assets/css/tokens.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        /* ---- 顶部条（与 page07 一致） ---- */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: linear-gradient(180deg,
+                color-mix(in srgb, var(--color-card) 94%, transparent) 0%,
+                color-mix(in srgb, var(--color-card) 72%, transparent) 100%);
+            backdrop-filter: blur(14px) saturate(1.5);
+            -webkit-backdrop-filter: blur(14px) saturate(1.5);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .topbar__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-md);
+            height: 64px;
+            padding: 0 var(--space-md);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 650;
+            color: var(--color-text-dark);
+            letter-spacing: -0.01em;
+        }
+
+        .brand__dot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-primary);
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .topbar__nav {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .topbar__nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .topbar__nav a,
+        .topbar__nav span {
+            padding: 0.55rem 0.5rem;
+            border-radius: var(--radius-sm);
+            color: var(--color-text-light);
+            white-space: nowrap;
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .topbar__nav a:hover {
+            color: var(--color-primary);
+            background-color: var(--color-primary-soft);
+        }
+
+        /* 当前页不可点击：用 span，避免自我跳转 */
+        .topbar__nav .is-current {
+            color: var(--color-primary);
+            font-weight: 600;
+            background-color: var(--color-primary-soft);
+            cursor: default;
+        }
+
+        /* ---- 页头 ---- */
+        .page-head {
+            padding: var(--space-xl) 0 var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .page-head h1 {
+            font-size: 2.2rem;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            color: var(--color-text-dark);
+            margin-bottom: 10px;
+        }
+
+        .page-head p {
+            color: var(--color-text-light);
+            font-size: 1.05rem;
+            max-width: 680px;
+        }
+
+        /* ---- 工具网格 ---- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            padding: var(--space-lg) 0 var(--space-xl);
+        }
+
+        .tool {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tool__head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            font-weight: 650;
+            color: var(--color-text-dark);
+        }
+
+        .tool__head i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-primary-soft);
+            color: var(--color-primary);
+            font-size: 0.85rem;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.15s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        textarea {
+            min-height: 96px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 9px 16px;
+            border: 1px solid var(--color-border-strong);
+            border-radius: var(--radius-sm);
+            background-color: transparent;
+            color: var(--color-text);
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .btn--primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #FFFFFF;
+        }
+
+        .btn--primary:hover {
+            background-color: var(--color-primary-hover);
+            border-color: var(--color-primary-hover);
+            color: #FFFFFF;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            min-height: 1.2em;
+        }
+
+        .hint.is-error {
+            color: #B42318;
+        }
+
+        /* ---- 页脚 ---- */
+        .foot {
+            border-top: 1px solid var(--color-border);
+            padding: var(--space-lg) 0;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        .foot__inner {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .foot a {
+            color: var(--color-text-light);
+        }
+
+        .foot a:hover {
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 560px) {
+            .topbar__nav {
+                display: none;
+            }
+
+            .page-head h1 {
+                font-size: 1.7rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="wrap topbar__inner">
+            <a class="brand" href="../index.html">
+                <span class="brand__dot"><i class="fas fa-compass"></i></span>
+                星宇·航图
+            </a>
+            <nav class="topbar__nav" aria-label="页面导航">
+                <a href="../index.html">首页</a>
+                <a href="page07.html">常用链接</a>
+                <span class="is-current" aria-current="page">开发工具箱</span>
+                <a href="page09.html">浏览器信息</a>
+                <a href="page10.html">大小写转换</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="page-head">
+            <h1>开发工具箱</h1>
+            <p>几个常用的小工具，全部在浏览器本地运行，输入内容不会上传到任何服务器。</p>
+        </div>
+
+        <div class="grid">
+            <!-- 时间戳转换 -->
+            <section class="tool">
+                <div class="tool__head"><i class="fas fa-clock"></i> 时间戳转换</div>
+                <div class="field">
+                    <label for="tsInput">时间戳（秒或毫秒）</label>
+                    <input type="text" id="tsInput" placeholder="例如 1730000000" autocomplete="off">
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn--primary" id="tsToDate">转为日期</button>
+                    <button type="button" class="btn" id="tsNow">当前时间戳</button>
+                </div>
+                <div class="hint" id="tsResult">支持 10 位（秒）与 13 位（毫秒）</div>
+            </section>
+
+            <!-- JSON 格式化 -->
+            <section class="tool">
+                <div class="tool__head"><i class="fas fa-code"></i> JSON 格式化</div>
+                <div class="field">
+                    <label for="jsonInput">JSON 文本</label>
+                    <textarea id="jsonInput" placeholder='{"name":"xy","tags":["docker","linux"]}' spellcheck="false"></textarea>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn--primary" id="jsonFormat">格式化</button>
+                    <button type="button" class="btn" id="jsonMinify">压缩</button>
+                </div>
+                <div class="hint" id="jsonResult">点击按钮处理</div>
+            </section>
+
+            <!-- Base64 -->
+            <section class="tool">
+                <div class="tool__head"><i class="fas fa-right-left"></i> Base64 编解码</div>
+                <div class="field">
+                    <label for="b64Input">原文 / Base64</label>
+                    <textarea id="b64Input" placeholder="输入文本后选择编码或解码" spellcheck="false"></textarea>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn--primary" id="b64Encode">编码</button>
+                    <button type="button" class="btn" id="b64Decode">解码</button>
+                </div>
+                <div class="hint" id="b64Result">支持中文（UTF-8）</div>
+            </section>
+
+            <!-- URL -->
+            <section class="tool">
+                <div class="tool__head"><i class="fas fa-link"></i> URL 编解码</div>
+                <div class="field">
+                    <label for="urlInput">原文 / 编码后</label>
+                    <textarea id="urlInput" placeholder="例如 你好 世界" spellcheck="false"></textarea>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn--primary" id="urlEncode">编码</button>
+                    <button type="button" class="btn" id="urlDecode">解码</button>
+                </div>
+                <div class="hint" id="urlResult">使用 encodeURIComponent</div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="foot">
+        <div class="wrap foot__inner">
+            <span>© <span id="footYear">2026</span> 星宇·航图 | XY's Blog</span>
+            <span><a href="../index.html">返回首页</a></span>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var yearEl = document.getElementById('footYear');
+            if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+            function setHint(el, text, isError) {
+                el.textContent = text;
+                el.classList.toggle('is-error', !!isError);
+            }
+
+            // ---- 时间戳 ----
+            var tsInput = document.getElementById('tsInput');
+            var tsResult = document.getElementById('tsResult');
+
+            document.getElementById('tsToDate').addEventListener('click', function () {
+                var raw = tsInput.value.trim();
+                if (!/^\d+$/.test(raw)) {
+                    setHint(tsResult, '请输入纯数字时间戳', true);
+                    return;
+                }
+                var n = Number(raw);
+                var ms = raw.length <= 10 ? n * 1000 : n;
+                var d = new Date(ms);
+                if (Number.isNaN(d.getTime())) {
+                    setHint(tsResult, '时间戳超出可解析范围', true);
+                    return;
+                }
+                setHint(tsResult, d.toLocaleString('zh-CN', { hour12: false }) + '  ·  本地时区');
+            });
+
+            document.getElementById('tsNow').addEventListener('click', function () {
+                var now = Date.now();
+                tsInput.value = String(now);
+                setHint(tsResult, '秒：' + Math.floor(now / 1000) + '　毫秒：' + now);
+            });
+
+            // ---- JSON ----
+            var jsonInput = document.getElementById('jsonInput');
+            var jsonResult = document.getElementById('jsonResult');
+
+            document.getElementById('jsonFormat').addEventListener('click', function () {
+                try {
+                    jsonInput.value = JSON.stringify(JSON.parse(jsonInput.value), null, 2);
+                    setHint(jsonResult, '格式化完成');
+                } catch (err) {
+                    setHint(jsonResult, '解析失败：' + err.message, true);
+                }
+            });
+
+            document.getElementById('jsonMinify').addEventListener('click', function () {
+                try {
+                    jsonInput.value = JSON.stringify(JSON.parse(jsonInput.value));
+                    setHint(jsonResult, '压缩完成');
+                } catch (err) {
+                    setHint(jsonResult, '解析失败：' + err.message, true);
+                }
+            });
+
+            // ---- Base64（UTF-8 安全）----
+            var b64Input = document.getElementById('b64Input');
+            var b64Result = document.getElementById('b64Result');
+
+            function utf8ToBase64(str) {
+                var bytes = new TextEncoder().encode(str);
+                var bin = '';
+                bytes.forEach(function (b) { bin += String.fromCharCode(b); });
+                return btoa(bin);
+            }
+
+            function base64ToUtf8(b64) {
+                var bin = atob(b64);
+                var bytes = new Uint8Array(bin.length);
+                for (var i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+                return new TextDecoder().decode(bytes);
+            }
+
+            document.getElementById('b64Encode').addEventListener('click', function () {
+                try {
+                    b64Input.value = utf8ToBase64(b64Input.value);
+                    setHint(b64Result, '编码完成');
+                } catch (err) {
+                    setHint(b64Result, '编码失败：' + err.message, true);
+                }
+            });
+
+            document.getElementById('b64Decode').addEventListener('click', function () {
+                try {
+                    b64Input.value = base64ToUtf8(b64Input.value.trim());
+                    setHint(b64Result, '解码完成');
+                } catch (err) {
+                    setHint(b64Result, '解码失败：不是合法的 Base64', true);
+                }
+            });
+
+            // ---- URL ----
+            var urlInput = document.getElementById('urlInput');
+            var urlResult = document.getElementById('urlResult');
+
+            document.getElementById('urlEncode').addEventListener('click', function () {
+                urlInput.value = encodeURIComponent(urlInput.value);
+                setHint(urlResult, '编码完成');
+            });
+
+            document.getElementById('urlDecode').addEventListener('click', function () {
+                try {
+                    urlInput.value = decodeURIComponent(urlInput.value);
+                    setHint(urlResult, '解码完成');
+                } catch (err) {
+                    setHint(urlResult, '解码失败：存在非法的百分号编码', true);
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星宇·航图 | XY's Blog</title>
+    <meta name="description" content="星宇·航图——XY 的个人站点：Linux、Docker、K8s 学习笔记，前端作品与常用工具合集。">
+    <link rel="canonical" href="https://xyos2.xyz/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="星宇·航图 | XY's Blog">
+    <meta property="og:title" content="星宇·航图 | XY's Blog">
+    <meta property="og:description" content="星宇·航图——XY 的个人站点：Linux、Docker、K8s 学习笔记，前端作品与常用工具合集。">
+    <meta property="og:url" content="https://xyos2.xyz/">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <link rel="stylesheet" href="assets/css/tokens.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%90%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- 左侧标题 -->
+            <a href="index.html" class="nav-brand">
+                <span class="nav-title">星宇·航图 | XY's Blog</span>
+            </a>
+            
+            <!-- 桌面端导航菜单 -->
+            <div class="nav-menu">
+                <a href="#home" class="nav-link">首页</a>
+                <a href="#works" class="nav-link">精选资源</a>
+                <a href="#tools" class="nav-link">常用工具</a>
+
+                <span class="nav-divider" aria-hidden="true"></span>
+
+                <a href="https://juejin.cn/user/2232425500384467/posts" class="nav-link nav-external" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-book-open"></i> 掘金社区
+                </a>
+                
+                <!-- QQ 群二维码 - 点击弹出图片 -->
+                <a href="javascript:void(0)" class="nav-link nav-external" id="qqBtn" aria-label="查看 QQ 群二维码">
+                    <i class="fab fa-qq"></i>
+                </a>
+                
+                <!-- 第三方链接 - 抖音 -->
+                <a href="https://www.douyin.com/user/MS4wLjABAAAAhY3iv3YOd2fQJqtSD70LpiLDw-oWAueJDPw_lHQogqE?from_tab_name=main" class="nav-link nav-external" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                <!-- 第三方链接 - GitHub -->
+                <a href="https://github.com/Rime2027" class="nav-link nav-external" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-github"></i>
+                </a>
+
+                <!-- 教程文档链接 -->
+                <a href="https://my.feishu.cn/wiki/space/7695374812016806852" class="nav-link nav-external" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-book"></i> 教程文档
+                </a>
+                
+                <!-- 个性化设置：外观模式 + 主题色 -->
+                <button class="theme-toggle" id="themeSettingsBtn" aria-label="个性化设置" aria-expanded="false" aria-controls="themePanel">
+                    <i class="fas fa-palette"></i>
+                </button>
+            </div>
+            
+            <!-- 移动端汉堡菜单按钮 -->
+            <button class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端下拉菜单 -->
+        <div class="nav-mobile" id="navMobile">
+            <a href="#home" class="nav-mobile-link">首页</a>
+            <a href="#works" class="nav-mobile-link">精选资源</a>
+            <a href="#tools" class="nav-mobile-link">常用工具</a>
+            
+            <a href="https://juejin.cn/user/2232425500384467/posts" class="nav-mobile-link nav-external" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-book-open"></i> 掘金社区
+            </a>
+            
+            <!-- QQ 群二维码 - 点击弹出图片 -->
+            <a href="javascript:void(0)" class="nav-mobile-link nav-external" id="qqBtnMobile">
+                <i class="fab fa-qq"></i> QQ 群
+            </a>
+            
+            <a href="https://www.douyin.com/user/MS4wLjABAAAAhY3iv3YOd2fQJqtSD70LpiLDw-oWAueJDPw_lHQogqE?from_tab_name=main" class="nav-mobile-link nav-external" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-tiktok"></i> 抖音
+            </a>
+            <a href="https://github.com/Rime2027" class="nav-mobile-link nav-external" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+
+            <!-- 教程文档链接 -->
+            <a href="https://my.feishu.cn/wiki/space/7695374812016806852" class="nav-mobile-link nav-external" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-book"></i> 教程文档
+            </a>
+            
+            <!-- 移动端个性化设置 -->
+            <button class="theme-toggle nav-mobile-link" id="mobileThemeSettingsBtn" aria-label="个性化设置" aria-expanded="false" aria-controls="themePanel">
+                <i class="fas fa-palette"></i> 个性化设置
+            </button>
+        </div>
+    </nav>
+
+    <!-- 个性化设置面板 -->
+    <div class="theme-panel" id="themePanel" role="dialog" aria-label="个性化设置" aria-hidden="true">
+        <div class="theme-panel__section">
+            <p class="theme-panel__label">外观</p>
+            <div class="theme-modes" role="radiogroup" aria-label="外观模式">
+                <button type="button" class="theme-mode" data-mode="light" role="radio" aria-checked="false">
+                    <i class="fas fa-sun"></i><span>浅色</span>
+                </button>
+                <button type="button" class="theme-mode" data-mode="dark" role="radio" aria-checked="false">
+                    <i class="fas fa-moon"></i><span>深色</span>
+                </button>
+                <button type="button" class="theme-mode" data-mode="system" role="radio" aria-checked="false">
+                    <i class="fas fa-circle-half-stroke"></i><span>跟随系统</span>
+                </button>
+            </div>
+        </div>
+        <div class="theme-panel__section">
+            <p class="theme-panel__label">主题色</p>
+            <div class="theme-accents" role="radiogroup" aria-label="主题色">
+                <button type="button" class="theme-accent" data-accent="blue" role="radio" aria-checked="false" aria-label="靛蓝">
+                    <span style="--swatch:#2563EB"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="teal" role="radio" aria-checked="false" aria-label="青碧">
+                    <span style="--swatch:#0D9488"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="violet" role="radio" aria-checked="false" aria-label="紫罗兰">
+                    <span style="--swatch:#7C3AED"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="amber" role="radio" aria-checked="false" aria-label="琥珀">
+                    <span style="--swatch:#B45309"></span>
+                </button>
+                <button type="button" class="theme-accent" data-accent="slate" role="radio" aria-checked="false" aria-label="石墨">
+                    <span style="--swatch:#475569"></span>
+                </button>
+            </div>
+        </div>
+        <div class="theme-panel__section">
+            <p class="theme-panel__label">色相</p>
+            <input type="range" id="hueSlider" class="hue-slider" min="0" max="359" step="1" value="221" aria-label="调整主题色相">
+            <div class="hue-slider__meta">
+                <span>拖动实时预览</span>
+                <span id="hueValue">221°</span>
+            </div>
+        </div>
+        <p class="theme-panel__hint">选择会保存在本机，下次打开自动应用</p>
+    </div>
+
+    <!-- Hero 区域 -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <h1 class="hero-title">探索数字宇宙的每一颗星辰</h1>
+            <p class="hero-subtitle">前端开发 · 技术探索 · 创意实现</p>
+            <div class="hero-scroll" id="scrollToWorks">
+                <span>向下探索</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- 精选资源区域 -->
+    <section id="works" class="section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="fas fa-bookmark"></i>
+                精选资源
+            </h2>
+            <p class="section-subtitle">学习笔记、实战教程与常用工具，点击直达</p>
+            
+            <div class="works-grid">
+                <!-- 作品卡片 - 语义化链接，搜索引擎与禁用 JS 的环境均可直接访问 -->
+                <a class="work-card" href="https://ai.feishu.cn/wiki/WPrawSK5Pijs3EkVdqGc0HrBnih" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h3 class="work-title">xy的笔记合集</h3>
+                    <p class="work-desc">飞书云文档-Linux相关笔记</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+                
+                <a class="work-card" href="https://juejin.cn/post/7452652375342874624" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fab fa-docker"></i>
+                    </div>
+                    <h3 class="work-title">CentOS 7 安装与配置 Docker</h3>
+                    <p class="work-desc">掘金社区发布的Docker安装教程</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+                
+                <a class="work-card" href="https://juejin.cn/post/7449325898703683595" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fab fa-vimeo"></i>
+                    </div>
+                    <h3 class="work-title">Vmware虚拟机中安装CentOS7</h3>
+                    <p class="work-desc">超详图文教程</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+                
+                <a class="work-card" href="https://ai.feishu.cn/wiki/IFkFwe0rrirh3ykW0fqcxQJYnHd" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h3 class="work-title">Docker和K8s部署</h3>
+                    <p class="work-desc">基础部署笔记-电脑端打开</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+                
+                <a class="work-card" href="https://juejin.cn/post/7453073341840113700" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3 class="work-title">Docker国内镜像源/加速地址</h3>
+                    <p class="work-desc">国内Docker镜像源推荐</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+                
+                <a class="work-card" href="https://haowallpaper.com/wallpaperForum" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <h3 class="work-title">哲风壁纸</h3>
+                    <p class="work-desc">高清壁纸下载社区</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+                
+                <a class="work-card" href="https://bbs.huaweicloud.com/blogs/236976" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-terminal"></i>
+                    </div>
+                    <h3 class="work-title">linux常用命令大全</h3>
+                    <p class="work-desc">网页笔记</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+                
+
+
+                <a class="work-card" href="https://juejin.cn/column/7448224551277969447" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fab fa-docker"></i>
+                    </div>
+                    <h3 class="work-title">Docker笔记合集</h3>
+                    <p class="work-desc">适用于Docker初学者-掘金社区</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+
+                <a class="work-card" href="https://juejin.cn/post/7456047754176643087" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <h3 class="work-title">搭建 Harbor 私有镜像仓库</h3>
+                    <p class="work-desc">手把手教你搭建Harbor-掘金社区</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+
+
+
+                <a class="work-card" href="https://kdocs.cn/l/caIQQKIJ96K2" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fab fa-windows"></i>
+                    </div>
+                    <h3 class="work-title">Windows优化工具</h3>
+                    <p class="work-desc">适用于Windows系统</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+
+                <a class="work-card" href="https://cloud.tencent.com/edu/learning/course-3080-55782" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="work-title">云服务操作管理培训</h3>
+                    <p class="work-desc">中级培训教材-适用于初学者</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+
+                <a class="work-card" href="https://hcnsseyzsztm.feishu.cn/wiki/space/7490191375732867074" target="_blank" rel="noopener noreferrer">
+                    <div class="work-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h3 class="work-title">Openstack部署过程</h3>
+                    <p class="work-desc">飞书文档-openstack部署</p>
+                    <div class="work-hover">
+                        查看详情 →
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 常用工具区域 -->
+    <section id="tools" class="section tools-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="fas fa-tools"></i>
+                常用工具
+            </h2>
+            <p class="section-subtitle">精心挑选的效率工具，点击卡片进入详情页面</p>
+            
+            <div class="tools-grid">
+                    <!-- 工具卡片 - 链接到子页面 -->
+                    <a href="pages/page01.html" class="tool-card" target="_blank" rel="noopener noreferrer">
+                        <div class="tool-header">
+                            <div class="tool-icon">
+                                <i class="fas fa-compass"></i>
+                            </div>
+                            <span class="tool-badge">热门</span>
+                        </div>
+                        <h3 class="tool-title">智能导航看板</h3>
+                        <p class="tool-desc">常用网站与资源导航</p>
+                        <div class="tool-footer">
+                            <span class="tool-tag">导航</span>
+                            <span class="tool-arrow">→</span>
+                        </div>
+                    </a>
+
+                    <a href="pages/page03.html" class="tool-card" target="_blank" rel="noopener noreferrer">
+                        <div class="tool-header">
+                            <div class="tool-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <h3 class="tool-title">网站快捷入口</h3>
+                        <p class="tool-desc">常用网站快捷入口</p>
+                        <div class="tool-footer">
+                            <span class="tool-tag">导航</span>
+                            <span class="tool-arrow">→</span>
+                        </div>
+                    </a>
+
+                    <a href="pages/page04.html" class="tool-card" target="_blank" rel="noopener noreferrer">
+                        <div class="tool-header">
+                            <div class="tool-icon">
+                                <i class="fas fa-circle"></i>
+                            </div>
+                        </div>
+                        <h3 class="tool-title">动态小球超链接页面</h3>
+                        <p class="tool-desc">趣味动态小球导航</p>
+                        <div class="tool-footer">
+                            <span class="tool-tag">趣味</span>
+                            <span class="tool-arrow">→</span>
+                        </div>
+                    </a>
+
+                    <a href="pages/page05.html" class="tool-card" target="_blank" rel="noopener noreferrer">
+                        <div class="tool-header">
+                            <div class="tool-icon">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <span class="tool-badge">实用</span>
+                        </div>
+                        <h3 class="tool-title">专业软件下载中心</h3>
+                        <p class="tool-desc">官方安全下载渠道</p>
+                        <div class="tool-footer">
+                            <span class="tool-tag">工具</span>
+                            <span class="tool-arrow">→</span>
+                        </div>
+                    </a>
+
+                    <a href="pages/page07.html" class="tool-card" target="_blank" rel="noopener noreferrer">
+                        <div class="tool-header">
+                            <div class="tool-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <span class="tool-badge">新增</span>
+                        </div>
+                        <h3 class="tool-title">常用链接</h3>
+                        <p class="tool-desc">笔记、教程与资源分类入口</p>
+                        <div class="tool-footer">
+                            <span class="tool-tag">导航</span>
+                            <span class="tool-arrow">→</span>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+    </section>
+
+    <!-- 底部栏 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>© <span id="copyrightYear">2026</span> 星宇·航图 | XY's Blog 保留所有权利</p>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-time">
+                        <i class="far fa-clock"></i>
+                        <span id="currentTime">正在加载时间...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- QQ 群二维码灯箱 -->
+    <div class="lightbox-overlay" id="qqLightbox">
+        <div class="lightbox-content">
+            <img src="assets/images/qq.jpg" alt="QQ 群二维码" class="lightbox-img" width="602" height="769" decoding="async">
+            <p class="lightbox-hint">扫描二维码加入qq群</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

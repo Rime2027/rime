@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浏览器信息 | 星宇·航图</title>
+    <meta name="description" content="查看当前浏览器版本、操作系统、屏幕分辨率、语言时区、硬件与网络等关键信息，全部在本地读取。">
+    <link rel="canonical" href="https://xyos2.xyz/pages/page09.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="星宇·航图 | XY's Blog">
+    <meta property="og:title" content="浏览器信息 | 星宇·航图">
+    <meta property="og:description" content="查看当前浏览器版本、操作系统、屏幕分辨率、语言时区、硬件与网络等关键信息。">
+    <meta property="og:url" content="https://xyos2.xyz/pages/page09.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="robots" content="noindex, follow">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%90%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../assets/css/tokens.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: linear-gradient(180deg,
+                color-mix(in srgb, var(--color-card) 94%, transparent) 0%,
+                color-mix(in srgb, var(--color-card) 72%, transparent) 100%);
+            backdrop-filter: blur(14px) saturate(1.5);
+            -webkit-backdrop-filter: blur(14px) saturate(1.5);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .topbar__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-md);
+            height: 64px;
+            padding: 0 var(--space-md);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 650;
+            color: var(--color-text-dark);
+            letter-spacing: -0.01em;
+        }
+
+        .brand__dot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-primary);
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .topbar__nav {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.92rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .topbar__nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .topbar__nav a,
+        .topbar__nav span {
+            padding: 0.55rem 0.5rem;
+            border-radius: var(--radius-sm);
+            color: var(--color-text-light);
+            white-space: nowrap;
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .topbar__nav a:hover {
+            color: var(--color-primary);
+            background-color: var(--color-primary-soft);
+        }
+
+        /* 当前页不可点击：用 span，避免自我跳转 */
+        .topbar__nav .is-current {
+            color: var(--color-primary);
+            font-weight: 600;
+            background-color: var(--color-primary-soft);
+            cursor: default;
+        }
+
+        .page-head {
+            padding: var(--space-xl) 0 var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .page-head h1 {
+            font-size: 2.2rem;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            color: var(--color-text-dark);
+            margin-bottom: 10px;
+        }
+
+        .page-head p {
+            color: var(--color-text-light);
+            font-size: 1.05rem;
+            max-width: 680px;
+        }
+
+        .notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 16px;
+            padding: 12px 14px;
+            border: 1px solid var(--color-border);
+            border-left: 3px solid var(--color-primary);
+            background-color: var(--color-card);
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+            max-width: 680px;
+        }
+
+        .notice i {
+            color: var(--color-primary);
+            margin-top: 3px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 20px;
+            padding: var(--space-lg) 0 var(--space-md);
+        }
+
+        .panel {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .panel h2 {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 1rem;
+            font-weight: 650;
+            color: var(--color-text-dark);
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .panel h2 i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-primary-soft);
+            color: var(--color-primary);
+            font-size: 0.75rem;
+        }
+
+        dl {
+            display: grid;
+            gap: 9px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 96px 1fr;
+            gap: 10px;
+            align-items: baseline;
+            font-size: 0.9rem;
+        }
+
+        dt {
+            color: var(--color-text-muted);
+            font-size: 0.84rem;
+        }
+
+        dd {
+            color: var(--color-text);
+            font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+            font-size: 0.86rem;
+            word-break: break-all;
+        }
+
+        dd.is-mono {
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-bottom: var(--space-xl);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: 1px solid var(--color-border-strong);
+            border-radius: var(--radius-sm);
+            background-color: transparent;
+            color: var(--color-text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .btn--primary {
+            background-color: var(--color-primary);
+            border-color: var(--color-primary);
+            color: #FFFFFF;
+        }
+
+        .btn--primary:hover {
+            background-color: var(--color-primary-hover);
+            border-color: var(--color-primary-hover);
+            color: #FFFFFF;
+        }
+
+        .foot {
+            border-top: 1px solid var(--color-border);
+            padding: var(--space-lg) 0;
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+        }
+
+        .foot__inner {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .foot a {
+            color: var(--color-text-light);
+        }
+
+        .foot a:hover {
+            color: var(--color-primary);
+        }
+
+        @media (max-width: 720px) {
+            .topbar__inner {
+                height: auto;
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 10px var(--space-md);
+            }
+
+            /* 移动端不再隐藏导航，改为整行横向滚动，保证始终可达 */
+            .topbar__nav {
+                width: 100%;
+                padding-bottom: 2px;
+            }
+
+            .page-head h1 {
+                font-size: 1.7rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .row {
+                grid-template-columns: 84px 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="wrap topbar__inner">
+            <a class="brand" href="../index.html">
+                <span class="brand__dot"><i class="fas fa-compass"></i></span>
+                星宇·航图
+            </a>
+            <nav class="topbar__nav" aria-label="页面导航">
+                <a href="../index.html">首页</a>
+                <a href="page07.html">常用链接</a>
+                <a href="page08.html">开发工具箱</a>
+                <span class="is-current" aria-current="page">浏览器信息</span>
+                <a href="page10.html">大小写转换</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="page-head">
+            <h1>浏览器信息</h1>
+            <p>当前设备与浏览器的基础信息，用于排查兼容性问题。</p>
+            <div class="notice">
+                <i class="fas fa-shield-halved"></i>
+                <span>以下信息全部在你的设备本地读取并显示，不会上传到任何服务器；刷新页面即可重新采集。</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <section class="panel">
+                <h2><i class="fas fa-globe"></i> 浏览器</h2>
+                <dl>
+                    <div class="row"><dt>名称</dt><dd id="browserName">—</dd></div>
+                    <div class="row"><dt>版本</dt><dd id="browserVersion">—</dd></div>
+                    <div class="row"><dt>渲染引擎</dt><dd id="engine">—</dd></div>
+                    <div class="row"><dt>UA 原始串</dt><dd id="userAgent" class="is-mono">—</dd></div>
+                </dl>
+            </section>
+
+            <section class="panel">
+                <h2><i class="fas fa-desktop"></i> 操作系统</h2>
+                <dl>
+                    <div class="row"><dt>系统</dt><dd id="osName">—</dd></div>
+                    <div class="row"><dt>架构</dt><dd id="arch">—</dd></div>
+                    <div class="row"><dt>设备类型</dt><dd id="deviceType">—</dd></div>
+                    <div class="row"><dt>平台标识</dt><dd id="platform">—</dd></div>
+                </dl>
+            </section>
+
+            <section class="panel">
+                <h2><i class="fas fa-microchip"></i> 图形与性能</h2>
+                <dl>
+                    <div class="row"><dt>GPU 渲染器</dt><dd id="gpu" class="is-mono">—</dd></div>
+                    <div class="row"><dt>页面加载</dt><dd id="timing">—</dd></div>
+                    <div class="row"><dt>存储配额</dt><dd id="storage">—</dd></div>
+                </dl>
+            </section>
+
+            <section class="panel">
+                <h2><i class="fas fa-language"></i> 语言与时区</h2>
+                <dl>
+                    <div class="row"><dt>首选语言</dt><dd id="language">—</dd></div>
+                    <div class="row"><dt>语言偏好</dt><dd id="languages">—</dd></div>
+                    <div class="row"><dt>时区</dt><dd id="timeZone">—</dd></div>
+                    <div class="row"><dt>UTC 偏移</dt><dd id="utcOffset">—</dd></div>
+                </dl>
+            </section>
+
+            <section class="panel">
+                <h2><i class="fas fa-microchip"></i> 硬件与网络</h2>
+                <dl>
+                    <div class="row"><dt>CPU 核心</dt><dd id="cores">—</dd></div>
+                    <div class="row"><dt>设备内存</dt><dd id="memory">—</dd></div>
+                    <div class="row"><dt>网络状态</dt><dd id="online">—</dd></div>
+                    <div class="row"><dt>连接类型</dt><dd id="connection">—</dd></div>
+                </dl>
+            </section>
+
+            <section class="panel">
+                <h2><i class="fas fa-clock"></i> 当前时间</h2>
+                <dl>
+                    <div class="row"><dt>本地时间</dt><dd id="localTime">—</dd></div>
+                    <div class="row"><dt>UTC 时间</dt><dd id="utcTime">—</dd></div>
+                    <div class="row"><dt>时间戳（秒）</dt><dd id="tsSec">—</dd></div>
+                    <div class="row"><dt>时间戳（毫秒）</dt><dd id="tsMs">—</dd></div>
+                </dl>
+            </section>
+
+            <section class="panel">
+                <h2><i class="fas fa-sliders"></i> 其他偏好</h2>
+                <dl>
+                    <div class="row"><dt>Cookie</dt><dd id="cookie">—</dd></div>
+                    <div class="row"><dt>禁止追踪</dt><dd id="dnt">—</dd></div>
+                    <div class="row"><dt>触摸支持</dt><dd id="touch">—</dd></div>
+                    <div class="row"><dt>指针精度</dt><dd id="pointer">—</dd></div>
+                    <div class="row"><dt>减少动效</dt><dd id="reduceMotion">—</dd></div>
+                </dl>
+            </section>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn btn--primary" id="copyAll">复制全部信息</button>
+            <button type="button" class="btn" id="refresh">重新采集</button>
+        </div>
+    </main>
+
+    <footer class="foot">
+        <div class="wrap foot__inner">
+            <span>© <span id="footYear">2026</span> 星宇·航图 | XY's Blog</span>
+            <span><a href="../index.html">返回首页</a></span>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var yearEl = document.getElementById('footYear');
+            if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+            var UA = navigator.userAgent;
+            var collected = {};
+
+            function set(id, value) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = value === undefined || value === null || value === '' ? '不可用' : String(value);
+                collected[id] = el.textContent;
+            }
+
+            // ---- 浏览器识别（按优先级，Edge/Opera 的 UA 里也含 Chrome，必须先判）----
+            function detectBrowser(ua) {
+                var m;
+                if ((m = ua.match(/Edg\/([\d.]+)/))) return { name: 'Microsoft Edge', version: m[1], engine: 'Blink' };
+                if ((m = ua.match(/OPR\/([\d.]+)/))) return { name: 'Opera', version: m[1], engine: 'Blink' };
+                if ((m = ua.match(/Firefox\/([\d.]+)/))) return { name: 'Firefox', version: m[1], engine: 'Gecko' };
+                if ((m = ua.match(/Chrome\/([\d.]+)/))) return { name: 'Chrome', version: m[1], engine: 'Blink' };
+                if ((m = ua.match(/Version\/([\d.]+).*Safari/))) return { name: 'Safari', version: m[1], engine: 'WebKit' };
+                return { name: '未知浏览器', version: '—', engine: '—' };
+            }
+
+            // ---- 系统识别 ----
+            function detectOS(ua) {
+                var m;
+                if (/Windows NT 10\.0/.test(ua)) return 'Windows 10 / 11';
+                if (/Windows NT 6\.3/.test(ua)) return 'Windows 8.1';
+                if (/Windows NT 6\.1/.test(ua)) return 'Windows 7';
+                if ((m = ua.match(/Android ([\d.]+)/))) return 'Android ' + m[1];
+                if ((m = ua.match(/iPhone OS ([\d_]+)/))) return 'iOS ' + m[1].replace(/_/g, '.');
+                if ((m = ua.match(/iPad.*OS ([\d_]+)/))) return 'iPadOS ' + m[1].replace(/_/g, '.');
+                if ((m = ua.match(/Mac OS X ([\d_]+)/))) return 'macOS ' + m[1].replace(/_/g, '.');
+                if (/CrOS/.test(ua)) return 'ChromeOS';
+                if (/Linux/.test(ua)) return 'Linux';
+                return navigator.platform || '未知系统';
+            }
+
+            function detectArch(ua) {
+                if (/arm64|aarch64/i.test(ua)) return 'ARM64';
+                if (/WOW64|x64|Win64|x86_64/i.test(ua)) return 'x86_64';
+                if (/arm/i.test(ua)) return 'ARM';
+                if (/i686|i386/i.test(ua)) return 'x86';
+                return '未标注';
+            }
+
+            function detectDevice(ua) {
+                if (/iPad|Tablet/i.test(ua)) return '平板';
+                if (/Mobi|iPhone|Android.*Mobile/i.test(ua)) return '手机';
+                return '桌面';
+            }
+
+            function formatOffset(minutes) {
+                var sign = minutes <= 0 ? '+' : '-';
+                var abs = Math.abs(minutes);
+                var h = String(Math.floor(abs / 60)).padStart(2, '0');
+                var m = String(abs % 60).padStart(2, '0');
+                return 'UTC' + sign + h + ':' + m;
+            }
+
+            function collect() {
+                var b = detectBrowser(UA);
+                set('browserName', b.name);
+                set('browserVersion', b.version);
+                set('engine', b.engine);
+                set('userAgent', UA);
+
+                set('osName', detectOS(UA));
+                set('arch', detectArch(UA));
+                set('deviceType', detectDevice(UA));
+                set('platform', navigator.platform || '未提供');
+
+                set('screenSize', screen.width + ' × ' + screen.height);
+                set('viewport', window.innerWidth + ' × ' + window.innerHeight);
+                set('dpr', window.devicePixelRatio ? window.devicePixelRatio + 'x' : '—');
+                set('colorDepth', screen.colorDepth ? screen.colorDepth + ' 位' : '—');
+
+                set('language', navigator.language);
+                set('languages', (navigator.languages || []).join(', '));
+                try {
+                    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    set('timeZone', tz || '—');
+                } catch (e) {
+                    set('timeZone', '—');
+                }
+                set('utcOffset', formatOffset(new Date().getTimezoneOffset()));
+
+                set('cores', navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' 核' : '未提供');
+                set('memory', navigator.deviceMemory ? '约 ' + navigator.deviceMemory + ' GB' : '未提供');
+
+                var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                set('connection', conn ? (conn.effectiveType || '未知') + (conn.downlink ? ' · 约 ' + conn.downlink + ' Mbps' : '') : '未提供');
+
+                set('cookie', navigator.cookieEnabled ? '已启用' : '已禁用');
+                set('dnt', navigator.doNotTrack === '1' ? '已开启' : '未开启');
+                set('touch', ('ontouchstart' in window) || navigator.maxTouchPoints > 0 ? '支持' : '不支持');
+                set('pointer', window.matchMedia('(pointer: fine)').matches ? '精确（鼠标/触控笔）' : '粗略（触摸）');
+                set('reduceMotion', window.matchMedia('(prefers-reduced-motion: reduce)').matches ? '已开启' : '未开启');
+            }
+
+            // ---- 时间：每秒刷新 ----
+            function tickTime() {
+                var now = new Date();
+                var pad = function (n) { return String(n).padStart(2, '0'); };
+
+                set('localTime', now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) +
+                    ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()));
+                set('utcTime', now.getUTCFullYear() + '-' + pad(now.getUTCMonth() + 1) + '-' + pad(now.getUTCDate()) +
+                    ' ' + pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + ':' + pad(now.getUTCSeconds()) + ' UTC');
+                set('tsSec', String(Math.floor(now.getTime() / 1000)));
+                set('tsMs', String(now.getTime()));
+            }
+
+            function updateOnline() {
+                set('online', navigator.onLine ? '在线' : '离线');
+            }
+
+            function refreshAll() {
+                collected = {};
+                collect();
+                updateOnline();
+                tickTime();
+            }
+
+            refreshAll();
+            setInterval(tickTime, 1000);
+            window.addEventListener('online', updateOnline);
+            window.addEventListener('offline', updateOnline);
+            window.addEventListener('resize', function () {
+                set('viewport', window.innerWidth + ' × ' + window.innerHeight);
+            });
+
+            // ---- 复制 ----
+            document.getElementById('copyAll').addEventListener('click', function () {
+                var btn = this;
+                var lines = ['浏览器信息 · ' + new Date().toLocaleString('zh-CN', { hour12: false })];
+                Object.keys(collected).forEach(function (k) {
+                    lines.push(k + ': ' + collected[k]);
+                });
+                var text = lines.join('\n');
+
+                function done(ok) {
+                    var original = btn.textContent;
+                    btn.textContent = ok ? '已复制' : '复制失败，请手动选择';
+                    setTimeout(function () { btn.textContent = original; }, 1600);
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+                } else {
+                    done(false);
+                }
+            });
+
+            document.getElementById('refresh').addEventListener('click', refreshAll);
+        })();
+    </script>
+</body>
+
+</html>

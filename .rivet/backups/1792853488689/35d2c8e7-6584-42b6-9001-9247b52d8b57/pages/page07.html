@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常用链接 | 星宇·航图</title>
+    <meta name="description" content="按分类整理的常用链接：Docker 与 K8s、Linux 与虚拟机、云服务培训、资源工具与个人主页。">
+    <link rel="canonical" href="https://xyos2.xyz/pages/page07.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="星宇·航图 | XY's Blog">
+    <meta property="og:title" content="常用链接 | 星宇·航图">
+    <meta property="og:description" content="按分类整理的常用链接：Docker 与 K8s、Linux 与虚拟机、云服务培训、资源工具与个人主页。">
+    <meta property="og:url" content="https://xyos2.xyz/pages/page07.html">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%90%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../assets/css/tokens.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 0 var(--space-md);
+        }
+
+        /* ---- 顶部条 ---- */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: linear-gradient(180deg,
+                color-mix(in srgb, var(--color-card) 94%, transparent) 0%,
+                color-mix(in srgb, var(--color-card) 72%, transparent) 100%);
+            backdrop-filter: blur(14px) saturate(1.5);
+            -webkit-backdrop-filter: blur(14px) saturate(1.5);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .topbar__inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-md);
+            height: 64px;
+            padding: 0 var(--space-md);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 650;
+            color: var(--color-text-dark);
+            letter-spacing: -0.01em;
+        }
+
+        .brand__dot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-primary);
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .topbar__nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .topbar__nav a {
+            padding: 0.6rem 0.55rem;
+            border-radius: var(--radius-sm);
+            color: var(--color-text-light);
+            transition: color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .topbar__nav a:hover {
+            color: var(--color-primary);
+            background-color: var(--color-primary-soft);
+        }
+
+        .topbar__nav a.is-current {
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        /* ---- 页头 ---- */
+        .page-head {
+            padding: var(--space-xl) 0 var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .page-head h1 {
+            font-size: 1.9rem;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            color: var(--color-text-dark);
+            margin-bottom: 8px;
+        }
+
+        .page-head p {
+            color: var(--color-text-light);
+            font-size: 0.95rem;
+            max-width: 640px;
+        }
+
+        /* ---- 两栏布局 ---- */
+        .layout {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: var(--space-xl);
+            padding: var(--space-lg) 0 var(--space-xl);
+        }
+
+        .toc {
+            position: sticky;
+            top: 84px;
+            align-self: start;
+        }
+
+        .toc__label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            color: var(--color-text-muted);
+            margin-bottom: 10px;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            color: var(--color-text-light);
+            border-left: 2px solid transparent;
+            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .toc a:hover {
+            color: var(--color-text);
+            background-color: var(--color-hover);
+        }
+
+        .toc a.is-active {
+            color: var(--color-primary);
+            border-left-color: var(--color-primary);
+            background-color: var(--color-primary-soft);
+            font-weight: 600;
+        }
+
+        /* ---- 分组 ---- */
+        .group + .group {
+            margin-top: var(--space-xl);
+        }
+
+        .group__head {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: var(--space-md);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .group__head h2 {
+            font-size: 1.15rem;
+            font-weight: 650;
+            color: var(--color-text-dark);
+            letter-spacing: -0.01em;
+        }
+
+        .group__count {
+            font-size: 0.78rem;
+            color: var(--color-text-muted);
+        }
+
+        .link-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-md);
+            padding: 14px 16px;
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+        }
+
+        .link-item:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+        .link-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--color-text-dark);
+            margin-bottom: 2px;
+        }
+
+        .link-meta {
+            font-size: 0.82rem;
+            color: var(--color-text-light);
+        }
+
+        .link-source {
+            display: inline-block;
+            padding: 1px 7px;
+            margin-right: 6px;
+            border-radius: 4px;
+            background-color: var(--color-primary-soft);
+            color: var(--color-primary);
+            font-size: 0.74rem;
+            font-weight: 600;
+        }
+
+        .link-go {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-muted);
+            font-size: 0.72rem;
+            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .link-item:hover .link-go {
+            color: var(--color-primary);
+            border-color: var(--color-primary);
+            background-color: var(--color-primary-soft);
+        }
+
+        /* ---- 页脚 ---- */
+        .foot {
+            border-top: 1px solid var(--color-border);
+            padding: var(--space-lg) 0;
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+
+        .foot__inner {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .foot a {
+            color: var(--color-text-light);
+        }
+
+        .foot a:hover {
+            color: var(--color-primary);
+        }
+
+        /* ---- 响应式 ---- */
+        @media (max-width: 860px) {
+            .layout {
+                grid-template-columns: 1fr;
+                gap: var(--space-md);
+            }
+
+            .toc {
+                position: static;
+                display: flex;
+                gap: 6px;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+
+            .toc__label {
+                display: none;
+            }
+
+            .toc a {
+                flex: none;
+                border-left: none;
+                border: 1px solid var(--color-border);
+                white-space: nowrap;
+            }
+
+            .toc a.is-active {
+                border-color: var(--color-primary);
+            }
+        }
+
+        @media (max-width: 560px) {
+            .topbar__nav {
+                display: none;
+            }
+
+            .page-head h1 {
+                font-size: 1.5rem;
+            }
+
+            .link-item {
+                padding: 12px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div class="wrap topbar__inner">
+            <a class="brand" href="../index.html">
+                <span class="brand__dot"><i class="fas fa-compass"></i></span>
+                星宇·航图
+            </a>
+            <nav class="topbar__nav" aria-label="页面导航">
+                <a href="../index.html">首页</a>
+                <a href="page01.html">导航看板</a>
+                <a href="page03.html">网站入口</a>
+                <a href="page05.html">软件下载</a>
+                <a class="is-current" href="page07.html">常用链接</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="wrap">
+        <div class="page-head">
+            <h1>常用链接</h1>
+            <p>按分类整理的技术笔记、教程与工具入口。左侧可跳转到对应分类，滚动时自动高亮当前位置。</p>
+        </div>
+
+        <div class="layout">
+            <aside class="toc" aria-label="分类导航">
+                <p class="toc__label">分类</p>
+                <a href="#cat-docker"><i class="fab fa-docker"></i> Docker &amp; K8s</a>
+                <a href="#cat-linux"><i class="fab fa-linux"></i> Linux &amp; 虚拟机</a>
+                <a href="#cat-cloud"><i class="fas fa-cloud"></i> 云服务 &amp; 培训</a>
+                <a href="#cat-tools"><i class="fas fa-folder-open"></i> 资源 &amp; 工具</a>
+                <a href="#cat-personal"><i class="fas fa-user"></i> 个人主页</a>
+            </aside>
+
+            <div class="groups">
+                <section class="group" id="cat-docker">
+                    <div class="group__head">
+                        <h2>Docker &amp; K8s</h2>
+                        <span class="group__count">5 条</span>
+                    </div>
+                    <div class="link-list">
+                        <a class="link-item" href="https://ai.feishu.cn/wiki/IFkFwe0rrirh3ykW0fqcxQJYnHd" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">Docker 和 K8s 部署</div>
+                                <div class="link-meta"><span class="link-source">飞书笔记</span>基础部署笔记</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://juejin.cn/post/7452652375342874624" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">CentOS 7 安装与配置 Docker</div>
+                                <div class="link-meta"><span class="link-source">掘金</span>Docker 安装教程</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://juejin.cn/post/7453073341840113700" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">Docker 国内镜像源 / 加速地址</div>
+                                <div class="link-meta"><span class="link-source">掘金</span>国内镜像源推荐</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://juejin.cn/column/7448224551277969447" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">Docker 笔记合集</div>
+                                <div class="link-meta"><span class="link-source">掘金专栏</span>适用于 Docker 初学者</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://juejin.cn/post/7456047754176643087" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">搭建 Harbor 私有镜像仓库</div>
+                                <div class="link-meta"><span class="link-source">掘金</span>手把手教程</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="group" id="cat-linux">
+                    <div class="group__head">
+                        <h2>Linux &amp; 虚拟机</h2>
+                        <span class="group__count">3 条</span>
+                    </div>
+                    <div class="link-list">
+                        <a class="link-item" href="https://ai.feishu.cn/wiki/WPrawSK5Pijs3EkVdqGc0HrBnih" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">xy 的笔记合集</div>
+                                <div class="link-meta"><span class="link-source">飞书云文档</span>Linux 相关笔记</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://juejin.cn/post/7449325898703683595" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">VMware 虚拟机中安装 CentOS 7</div>
+                                <div class="link-meta"><span class="link-source">掘金</span>超详图文教程</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://bbs.huaweicloud.com/blogs/236976" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">Linux 常用命令大全</div>
+                                <div class="link-meta"><span class="link-source">华为云博客</span>命令速查笔记</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="group" id="cat-cloud">
+                    <div class="group__head">
+                        <h2>云服务 &amp; 培训</h2>
+                        <span class="group__count">2 条</span>
+                    </div>
+                    <div class="link-list">
+                        <a class="link-item" href="https://cloud.tencent.com/edu/learning/course-3080-55782" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">云服务操作管理培训</div>
+                                <div class="link-meta"><span class="link-source">腾讯云</span>中级培训教材</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://hcnsseyzsztm.feishu.cn/wiki/space/7490191375732867074" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">OpenStack 部署过程</div>
+                                <div class="link-meta"><span class="link-source">飞书文档</span>部署记录</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="group" id="cat-tools">
+                    <div class="group__head">
+                        <h2>资源 &amp; 工具</h2>
+                        <span class="group__count">4 条</span>
+                    </div>
+                    <div class="link-list">
+                        <a class="link-item" href="https://haowallpaper.com/wallpaperForum" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">哲风壁纸</div>
+                                <div class="link-meta"><span class="link-source">壁纸站</span>高清壁纸下载社区</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://kdocs.cn/l/caIQQKIJ96K2" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">Windows 优化工具</div>
+                                <div class="link-meta"><span class="link-source">金山文档</span>适用于 Windows 系统</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://webgame.one/#/" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">摸鱼网站</div>
+                                <div class="link-meta"><span class="link-source">WebGame</span>网页游戏平台</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                        <a class="link-item" href="https://www.kdocs.cn/l/cuIItKXdpuTO" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">电影资源网页</div>
+                                <div class="link-meta"><span class="link-source">金山文档</span>电影资源合集</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="group" id="cat-personal">
+                    <div class="group__head">
+                        <h2>个人主页</h2>
+                        <span class="group__count">1 条</span>
+                    </div>
+                    <div class="link-list">
+                        <a class="link-item" href="https://juejin.cn/user/2232425500384467/posts" target="_blank" rel="noopener noreferrer">
+                            <div>
+                                <div class="link-title">我的掘金社区</div>
+                                <div class="link-meta"><span class="link-source">掘金</span>技术文章主页</div>
+                            </div>
+                            <span class="link-go"><i class="fas fa-arrow-up-right-from-square"></i></span>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="foot">
+        <div class="wrap foot__inner">
+            <span>© <span id="footYear">2026</span> 星宇·航图 | XY's Blog</span>
+            <span>
+                <a href="../index.html">返回首页</a>
+            </span>
+        </div>
+    </footer>
+
+    <script>
+        // 沿用首页的主题偏好（外观模式 + 主题色）
+        (function () {
+            var body = document.body;
+            var mode = localStorage.getItem('theme-mode') || 'system';
+            var accent = localStorage.getItem('theme-accent') || 'blue';
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
+
+            if (isDark) body.classList.add('dark');
+            body.dataset.accent = accent;
+
+            var yearEl = document.getElementById('footYear');
+            if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+            // 目录高亮
+            var tocLinks = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+            var sections = tocLinks.map(function (a) {
+                return document.querySelector(a.getAttribute('href'));
+            }).filter(Boolean);
+
+            function highlight() {
+                var pos = window.scrollY + 140;
+                var current = 0;
+                sections.forEach(function (sec, i) {
+                    if (sec.offsetTop <= pos) current = i;
+                });
+                tocLinks.forEach(function (a, i) {
+                    a.classList.toggle('is-active', i === current);
+                });
+            }
+
+            var ticking = false;
+            window.addEventListener('scroll', function () {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(function () {
+                    ticking = false;
+                    highlight();
+                });
+            }, { passive: true });
+
+            highlight();
+        })();
+    </script>
+</body>
+
+</html>

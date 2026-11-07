@@ -1,0 +1,149 @@
+/* ==========================================================================
+   设计令牌（Design Tokens）
+   --------------------------------------------------------------------------
+   所有页面共用。参考 Ant Design 的层级划分思路：
+     · 背景分三级：页面底 / 区块底 / 容器（卡片）
+     · 文字分四级：标题 / 正文 / 次要 / 辅助
+     · 边框分两级：常规分隔 / 强调
+   主色走色阶（brand-50 ~ brand-700），换主题色只需覆盖色阶，其余自动跟随。
+   ========================================================================== */
+
+:root {
+    color-scheme: light;
+
+    /* ---- 品牌色阶：默认靛蓝 ---- */
+    --brand-50: #EFF6FF;
+    --brand-100: #DBEAFE;
+    --brand-200: #BFDBFE;
+    --brand-500: #3B82F6;
+    --brand-600: #2563EB;
+    --brand-700: #1D4ED8;
+
+    /* ---- 语义色 ---- */
+    --color-primary: var(--brand-600);
+    --color-primary-hover: var(--brand-700);
+    --color-primary-soft: var(--brand-50);
+    --color-secondary: #6366F1;
+    --color-accent: #B45309;
+
+    /* ---- 背景三级 ---- */
+    --color-bg: #F5F7FA;
+    --color-bg-subtle: #EDF1F6;
+    --color-card: #FFFFFF;
+
+    /* ---- 文字四级 ---- */
+    --color-text-dark: #0F1419;
+    --color-text: #253040;
+    --color-text-light: #5B6675;
+    --color-text-muted: #8B95A3;
+
+    /* ---- 边框两级 ---- */
+    --color-border: #E3E8EE;
+    --color-border-strong: #CFD6DF;
+    --color-hover: rgba(37, 99, 235, 0.06);
+
+    /* ---- 阴影：贴纸感，不做发光 ---- */
+    --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+    --shadow-md: 0 2px 8px rgba(16, 24, 40, 0.07);
+    --shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.10);
+    --shadow-glow: none;
+
+    /* ---- 圆角 ---- */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+
+    /* ---- 间距 ---- */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
+}
+
+/* ---- 暗色：中性近黑，靠边框而非投影区分层次 ---- */
+body.dark {
+    color-scheme: dark;
+
+    --color-primary: var(--brand-500);
+    --color-primary-hover: var(--brand-200);
+    --color-primary-soft: rgba(255, 255, 255, 0.06);
+    --color-secondary: #A8C4DC;
+    --color-accent: #D9A05B;
+
+    --color-bg: #0F1216;
+    --color-bg-subtle: #15191F;
+    --color-card: #1A1F26;
+
+    --color-text-dark: #F5F7FA;
+    --color-text: #DFE4EA;
+    --color-text-light: #9BA3AE;
+    --color-text-muted: #6E7783;
+
+    --color-border: #262D36;
+    --color-border-strong: #37404C;
+    --color-hover: rgba(255, 255, 255, 0.07);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --shadow-glow: none;
+}
+
+/* ---- 主题色预设：只覆盖色阶，语义变量自动跟随 ---- */
+body[data-accent="blue"] {
+    --brand-50: #EFF6FF;
+    --brand-100: #DBEAFE;
+    --brand-200: #BFDBFE;
+    --brand-500: #3B82F6;
+    --brand-600: #2563EB;
+    --brand-700: #1D4ED8;
+}
+
+body[data-accent="teal"] {
+    --brand-50: #F0FDFA;
+    --brand-100: #CCFBF1;
+    --brand-200: #99F6E4;
+    --brand-500: #14B8A6;
+    --brand-600: #0D9488;
+    --brand-700: #0F766E;
+}
+
+body[data-accent="violet"] {
+    --brand-50: #F5F3FF;
+    --brand-100: #EDE9FE;
+    --brand-200: #DDD6FE;
+    --brand-500: #8B5CF6;
+    --brand-600: #7C3AED;
+    --brand-700: #6D28D9;
+}
+
+body[data-accent="amber"] {
+    --brand-50: #FFFBEB;
+    --brand-100: #FEF3C7;
+    --brand-200: #FDE68A;
+    --brand-500: #D97706;
+    --brand-600: #B45309;
+    --brand-700: #92400E;
+}
+
+body[data-accent="slate"] {
+    --brand-50: #F8FAFC;
+    --brand-100: #F1F5F9;
+    --brand-200: #E2E8F0;
+    --brand-500: #64748B;
+    --brand-600: #475569;
+    --brand-700: #334155;
+}
+
+/* 琥珀与石墨在暗色下提亮一档保证对比度 */
+body.dark[data-accent="amber"] {
+    --brand-500: #F59E0B;
+    --brand-600: #D97706;
+}
+
+body.dark[data-accent="slate"] {
+    --brand-500: #94A3B8;
+    --brand-600: #CBD5E1;
+    --brand-700: #E2E8F0;
+}
