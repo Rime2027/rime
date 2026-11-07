@@ -45,7 +45,7 @@ git commit -m "修改说明"
 git push origin main
 ```
 
-> 仓库名为 `xyos2.github.io`，但 **GitHub Pages 并未启用**（`xyos2.github.io` 返回 404），实际托管在 Netlify。
+> 仓库地址：[https://github.com/Rime2027/rime](https://github.com/Rime2027/rime)，但 **GitHub Pages 并未启用**，实际托管在 Netlify。
 
 ## 验证
 
@@ -67,7 +67,8 @@ npm test
 
 ## 联系方式
 
-- GitHub: [https://github.com/xyos2](https://github.com/xyos2)
+- GitHub: [https://github.com/Rime2027](https://github.com/Rime2027)
+- 仓库: [https://github.com/Rime2027/rime](https://github.com/Rime2027/rime)
 - 掘金: [https://juejin.cn/user/2232425500384467/posts](https://juejin.cn/user/2232425500384467/posts)
 - 抖音: [https://www.douyin.com/user/MS4wLjABAAAAhY3iv3YOd2fQJqtSD70LpiLDw-oWAueJDPw_lHQogqE](https://www.douyin.com/user/MS4wLjABAAAAhY3iv3YOd2fQJqtSD70LpiLDw-oWAueJDPw_lHQogqE)
 - QQ: 1745818515
